@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bailey's chatroom</title>
+    <style>
+        @font-face {
+            font-family: 'MyCustomFont';
+            src: url('/static/font.ttf') format('truetype');
+        }
+
+        .custom-font {
+            font-family: 'MyCustomFont'
+        }
+        /* Add CSS styles for the chat box */
+        #chat-box {
+            width: 1200px;
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+/* Variables */
+:root {
+  --primary: #11998e;
+  --secondary: #38ef7d;
+  --white: #fff;
+  --gray: #9b9b9b;
+}
+
+/* .form__group */
+.form__group {
+  position: relative;
+  padding: 15px 0 0;
+  margin-top: 10px;
+  width: 50%;
+}
+
+/* .form__field */
+.form__field {
+  font-family: inherit;
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid var(--gray);
+  outline: 0;
+  font-size: 1.3rem;
+  color: var(--white);
+  padding: 7px 0;
+  background: transparent;
+  transition: border-color 0.2s;
+}
+
+.form__field::placeholder {
+  color: transparent;
+}
+
+.form__field:placeholder-shown ~ .form__label {
+  font-size: 1.3rem;
+  cursor: text;
+  top: 20px;
+}
+
+/* .form__label */
+.form__label {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: 0.2s;
+  font-size: 1rem;
+  color: var(--gray);
+}
+
+/* .form__field:focus */
+.form__field:focus {
+  padding-bottom: 6px;
+  font-weight: 700;
+  border-width: 3px;
+  border-image: linear-gradient(to right, var(--primary), var(--secondary));
+  border-image-slice: 1;
+}
+
+/* Reset input styles */
+.form__field:required, .form__field:invalid {
+  box-shadow: none;
+}
+
+/* Demo styles */
+body {
+  font-family: 'MyCustomFont';
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.5rem;
+  background-color: #222222;
+}
+
+    </style>
+</head>
+<body>
+    <h1>Bailey's chatroom</h1>
+    <div id="chat-box">
+        {% for message in messages %}
+            <p><strong>{{ message[0] }}:</strong> {{ message[1] }}</p>
+        {% endfor %}
+    </div>
+    <div class="form__group field">
+        <input type="input" class="form__field" placeholder="Message" name="name" id='name' required></input>
+        <input type="text" id="username" name="username" placeholder="Username"></input>
+        <label for="name" class="form__label">Message</label>
+      </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+    
+        socket.on('message', function(data) {
+            const chatBox = document.getElementById("chat-box");
+            const messageElement = document.createElement("p");
+            messageElement.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+            chatBox.appendChild(messageElement);
+    
+            // Scroll to the bottom of the chat box to show the latest message
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    
+        const messageForm = document.getElementById("message-form");
+        const messageInput = document.getElementById("name");
+        const userName = document.getElementById("username")
+        setUsername = localStorage.getItem("username")
+        userName.value = setUsername
+
+        userName.addEventListener("keydown", function(event) {
+          if (event.key == 'Enter' && !event.shiftKey) {
+            event.preventDefault()
+            console.log(userName.value)
+            localStorage.setItem("username", userName.value)
+          }
+        })
+    
+        // Submit the form when Enter is pressed in the message input field
+        messageInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault(); // Prevent the default Enter key behavior (new line)
+                const username = document.getElementById("username").value;
+                const message = messageInput.value;
+    
+                if (username && message) {
+                    socket.emit('message', {'username': username, 'message': message});
+                    messageInput.value = "";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
