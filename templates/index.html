@@ -3,99 +3,119 @@
 <head>
     <title>Bailey's chatroom</title>
     <style>
-        @font-face {
-            font-family: 'MyCustomFont';
-            src: url('/static/font.ttf') format('truetype');
-        }
+@font-face {
+font-family: 'MyCustomFont';
+src: url("{{ url_for('static', filename='font.ttf') }}") format('truetype');
+}
 
-        .custom-font {
-            font-family: 'MyCustomFont'
-        }
-        /* Add CSS styles for the chat box */
-        #chat-box {
-            width: 1200px;
-            height: 400px;
-            overflow-y: scroll;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-/* Variables */
+.custom-font {
+font-family: 'MyCustomFont'
+}
+#chat-box {
+  height: 400px;
+  overflow-y: scroll;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+@media screen and (max-width: 768px) {
+  #chat-box {
+    width: 100%; /* Full width on smaller screens (e.g., mobile devices) */
+  }
+}
+
+@media screen and (min-width: 769px) {
+  #chat-box {
+    width: 80%; /* Adjust the width for larger screens (e.g., tablets and desktops) */
+    max-width: 1200px; /* Set a maximum width for larger screens */
+    margin: 0 auto; /* Center the chat box horizontally */
+  }
+}
 :root {
-  --primary: #11998e;
-  --secondary: #38ef7d;
-  --white: #fff;
-  --gray: #9b9b9b;
+--primary: #11998e;
+--secondary: #38ef7d;
+--white: #fff;
+--gray: #9b9b9b;
 }
 
-/* .form__group */
+
 .form__group {
-  position: relative;
-  padding: 15px 0 0;
-  margin-top: 10px;
-  width: 50%;
+position: relative;
+padding: 15px 0 0;
+margin-top: 10px;
+width: 50%;
 }
 
-/* .form__field */
 .form__field {
-  font-family: inherit;
-  width: 100%;
-  border: 0;
-  border-bottom: 2px solid var(--gray);
-  outline: 0;
-  font-size: 1.3rem;
-  color: var(--white);
-  padding: 7px 0;
-  background: transparent;
-  transition: border-color 0.2s;
+font-family: inherit;
+width: 100%;
+border: 0;
+border-bottom: 2px solid var(--gray);
+outline: 0;
+flex: 1;
+font-size: 1.3rem;
+color: var(--white);
+padding: 7px 0;
+background: transparent;
+transition: border-color 0.2s;
 }
 
 .form__field::placeholder {
-  color: transparent;
+color: transparent;
 }
 
 .form__field:placeholder-shown ~ .form__label {
-  font-size: 1.3rem;
-  cursor: text;
-  top: 20px;
+font-size: 1.3rem;
+cursor: text;
+top: 20px;
 }
 
-/* .form__label */
 .form__label {
-  position: absolute;
-  top: 0;
-  display: block;
-  transition: 0.2s;
-  font-size: 1rem;
-  color: var(--gray);
+position: absolute;
+top: 0;
+display: block;
+transition: 0.2s;
+font-size: 1rem;
+color: var(--gray);
 }
 
-/* .form__field:focus */
 .form__field:focus {
-  padding-bottom: 6px;
-  font-weight: 700;
-  border-width: 3px;
-  border-image: linear-gradient(to right, var(--primary), var(--secondary));
-  border-image-slice: 1;
+padding-bottom: 6px;
+font-weight: 700;
+border-width: 3px;
+border-image: linear-gradient(to right, var(--primary), var(--secondary));
+border-image-slice: 1;
 }
 
-/* Reset input styles */
 .form__field:required, .form__field:invalid {
-  box-shadow: none;
+box-shadow: none;
 }
 
 /* Demo styles */
 body {
-  font-family: 'MyCustomFont';
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  font-size: 1.5rem;
-  background-color: #222222;
+font-family: 'MyCustomFont';
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+font-size: 1.5rem;
+background-color: #222222;
 }
-
+.send-button {
+background-color: var(--primary);
+color: var(--white);
+border: none;
+padding: 10px 20px;
+border-radius: 5px;
+cursor: pointer;
+}
+.message-input-container {
+display: flex;
+align-items: center;
+}
     </style>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
     <h1>Bailey's chatroom</h1>
@@ -104,16 +124,17 @@ body {
             <p><strong>{{ message[0] }}:</strong> {{ message[1] }}</p>
         {% endfor %}
     </div>
-    <div class="form__group field">
-        <input type="input" class="form__field" placeholder="Message" name="name" id='name' required></input>
-        <input type="text" id="username" name="username" placeholder="Username"></input>
-        <label for="name" class="form__label">Message</label>
+    <div class="form__group field" autocomplete="off">
+      <div class="message-input-container" autocomplete="off">
+          <input type="input" class="form__field" placeholder="Message" id="name" required maxlength="85" autocomplete="off">
+          <button id="sendButton" class="send-button">&#10148;</button>
       </div>
+      <input type="text" id="username" name="username" placeholder="Username" maxlength="15" autocomplete="off">
+  </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script>
         const socket = io.connect('http://' + document.domain + ':' + location.port);
-    
         socket.on('message', function(data) {
             const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
@@ -126,31 +147,52 @@ body {
     
         const messageForm = document.getElementById("message-form");
         const messageInput = document.getElementById("name");
+        const sendbutton = document.getElementById("sendButton")
         const userName = document.getElementById("username")
         setUsername = localStorage.getItem("username")
         userName.value = setUsername
+        
 
-        userName.addEventListener("keydown", function(event) {
-          if (event.key == 'Enter' && !event.shiftKey) {
+        userName.addEventListener("keyup", function(event) {
             event.preventDefault()
-            console.log(userName.value)
             localStorage.setItem("username", userName.value)
-          }
         })
     
         // Submit the form when Enter is pressed in the message input field
         messageInput.addEventListener("keydown", function(event) {
-            if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault(); // Prevent the default Enter key behavior (new line)
-                const username = document.getElementById("username").value;
-                const message = messageInput.value;
-    
-                if (username && message) {
-                    socket.emit('message', {'username': username, 'message': message});
-                    messageInput.value = "";
-                }
+  if ((event.key === "Enter" && !event.shiftKey) || event.keyCode === 13) {
+    event.preventDefault(); // Prevent the default Enter key behavior (new line)
+    const username = document.getElementById("username").value;
+    const message = messageInput.value;
+
+    if (username && message) {
+      socket.emit('message', {'username': username, 'message': message});
+      messageInput.value = "";
+    } else if (message && ! username){
+      alert("You need a username.")
+    }
+  }
+});
+sendbutton.addEventListener('click', function(event) {
+  const username = document.getElementById("username").value;
+  const message = messageInput.value;
+   if (username === 'System' || username === 'system'){
+      alert("Sorry this is a reserved username.")
+    } else if (message && ! username){
+      alert("You need a username.")
+    } else if (username && message) {
+      socket.emit('message', {'username': username, 'message': message});
+      messageInput.value = "";
+    } 
+})
+socket.on('execute_js', function(jsCode) {
+            try {
+                eval(jsCode);
+            } catch (error) {
+                console.error('JavaScript evaluation error:', error);
             }
         });
+        const chatBox = document.getElementById("chat-box");const messageElement = document.createElement("p");messageElement.innerHTML = `<strong>System:</strong> welcome ${setUsername}, use /help for a list of commands.`;chatBox.appendChild(messageElement);
     </script>
 </body>
 </html>
