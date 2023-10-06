@@ -102,6 +102,22 @@ min-height: 100vh;
 font-size: 1.5rem;
 background-color: #222222;
 }
+.rainbowText {
+  font-family:arial black;
+  font-size:70px;
+  background-image: 
+    linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet); 
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;  
+  animation: move 150s linear infinite;
+}
+
+@keyframes move {
+  to {
+    background-position: 4500vh;
+  }
+}
+
 .send-button {
 background-color: var(--primary);
 color: var(--white);
@@ -118,10 +134,10 @@ align-items: center;
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <h1>Bailey's chatroom</h1>
+    <h1 class="rainbowText">Bailey's chatroom</h1>
     <div id="chat-box">
         {% for message in messages %}
-            <p><strong>{{ message[0] }}:</strong> {{ message[1] }}</p>
+            <p><strong style="color: rgb(198, 201, 204)">{{ message[0] }}:</strong> <span style="color: rgb(198, 201, 204)">{{ message[1] }}</span></p>
         {% endfor %}
     </div>
     <div class="form__group field" autocomplete="off">
@@ -138,7 +154,7 @@ align-items: center;
         socket.on('message', function(data) {
             const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
-            messageElement.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+            messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">${data.username}:</strong> <span style="color: rgb(198, 201, 204);">${data.message}</span>`;
             chatBox.appendChild(messageElement);
     
             // Scroll to the bottom of the chat box to show the latest message
@@ -162,28 +178,44 @@ align-items: center;
         messageInput.addEventListener("keydown", function(event) {
   if ((event.key === "Enter" && !event.shiftKey) || event.keyCode === 13) {
     event.preventDefault(); // Prevent the default Enter key behavior (new line)
-    const username = document.getElementById("username").value;
-    const message = messageInput.value;
-
-    if (username && message) {
+    var username = document.getElementById("username").value;
+  const message = messageInput.value;
+  username = username.trim()
+  username = username.toLowerCase()
+  console.log(username)
+    if (message && username === 'admin'){
+      var resp = window.prompt("Enter key...")
+      socket.emit('AdminMessage', {'message': message, 'key' : resp});
+    }
+    if (message && ! username){
+      alert("You need a username.")
+  } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
       socket.emit('message', {'username': username, 'message': message});
       messageInput.value = "";
-    } else if (message && ! username){
-      alert("You need a username.")
+    } if (bannedNames.includes(username)){
+      alert("This is a reserved name, sorry.")
     }
   }
 });
+bannedNames = ['System', 'system']
 sendbutton.addEventListener('click', function(event) {
-  const username = document.getElementById("username").value;
+  var username = document.getElementById("username").value;
   const message = messageInput.value;
-   if (username === 'System' || username === 'system'){
-      alert("Sorry this is a reserved username.")
-    } else if (message && ! username){
+  username = username.trim()
+  username = username.toLowerCase()
+  console.log(username)
+    if (message && username === 'admin'){
+      var resp = window.prompt("Enter key...")
+      socket.emit('AdminMessage', {'message': message, 'key' : resp});
+    }
+    if (message && ! username){
       alert("You need a username.")
-    } else if (username && message) {
+  } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
       socket.emit('message', {'username': username, 'message': message});
       messageInput.value = "";
-    } 
+    } if (bannedNames.includes(username)){
+      alert("This is a reserved name, sorry.")
+    }
 })
 socket.on('execute_js', function(jsCode) {
             try {
