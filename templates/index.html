@@ -145,7 +145,6 @@ align-items: center;
           <input type="input" class="form__field" placeholder="Message" id="name" required maxlength="85" autocomplete="off">
           <button id="sendButton" class="send-button">&#10148;</button>
       </div>
-      <input type="text" id="username" name="username" placeholder="Username" maxlength="15" autocomplete="off">
   </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
@@ -160,28 +159,23 @@ align-items: center;
             // Scroll to the bottom of the chat box to show the latest message
             chatBox.scrollTop = chatBox.scrollHeight;
         });
-    
+        
         const messageForm = document.getElementById("message-form");
         const messageInput = document.getElementById("name");
         const sendbutton = document.getElementById("sendButton")
-        const userName = document.getElementById("username")
-        setUsername = localStorage.getItem("username")
-        userName.value = setUsername
-        
-
-        userName.addEventListener("keyup", function(event) {
-            event.preventDefault()
-            localStorage.setItem("username", userName.value)
-        })
+        const setUsername = localStorage.getItem("username");
+        const loggedin = localStorage.getItem('LoggedIn');
+        if (!setUsername || !loggedin){
+          window.location.href = '../Login';
+        }
     
         // Submit the form when Enter is pressed in the message input field
         messageInput.addEventListener("keydown", function(event) {
   if ((event.key === "Enter" && !event.shiftKey) || event.keyCode === 13) {
     event.preventDefault(); // Prevent the default Enter key behavior (new line)
-    var username = document.getElementById("username").value;
+    var username = setUsername;
   const message = messageInput.value;
   username = username.trim()
-  username = username.toLowerCase()
   console.log(username)
     if (message && username === 'admin'){
       var resp = window.prompt("Enter key...")
@@ -199,10 +193,9 @@ align-items: center;
 });
 bannedNames = ['System', 'system']
 sendbutton.addEventListener('click', function(event) {
-  var username = document.getElementById("username").value;
+  var username = setUsername;
   const message = messageInput.value;
   username = username.trim()
-  username = username.toLowerCase()
   console.log(username)
     if (message && username === 'admin'){
       var resp = window.prompt("Enter key...")

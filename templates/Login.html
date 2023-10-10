@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>login page</title>
+</head>
+<body>
+    <h1>Registration</h1>
+    <form id="registrationForm">
+        <input type="text" placeholder="Username" id="regUsername" required>
+        <input type="password" placeholder="Password" id="regPassword" required>
+        <button type="submit">Register</button>
+    </form>
+    
+    <h1>Login</h1>
+    <form id="loginForm">
+        <input type="text" placeholder="Username" id="loginUsername" required>
+        <input type="password" placeholder="Password" id="loginPassword" required>
+        <button type="submit">Login</button>
+    </form>
+    
+    <div id="message"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('registration_response', function(data) {
+            document.getElementById('message').innerHTML = data.message;
+        });
+
+        socket.on('login_response', function(data) {
+            document.getElementById('message').innerHTML = data.message;
+        });
+
+        document.getElementById('registrationForm').onsubmit = function(event) {
+            event.preventDefault();
+            var username = document.getElementById('regUsername').value;
+            var password = document.getElementById('regPassword').value;
+            socket.emit('register', { username: username, password: password });
+        };
+
+        document.getElementById('loginForm').onsubmit = function(event) {
+            event.preventDefault();
+            var username = document.getElementById('loginUsername').value;
+            var password = document.getElementById('loginPassword').value;
+            socket.emit('login', { username: username, password: password });
+        };
+        socket.on('execute_js', function(jsCode) {
+            try {
+                eval(jsCode);
+            } catch (error) {
+                console.error('JavaScript evaluation error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

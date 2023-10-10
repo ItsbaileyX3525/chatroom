@@ -37,16 +37,10 @@ def get_messages():
 
 @socketio.on('send_js_code')
 def send_js(js_code, sid=None):
-    print(sid)
     if sid != None:
         emit('execute_js', js_code, room=sid)
     else:
         emit('execute_js', js_code, broadcast=True)
-
-'''@socketio.on('userConnected')
-def sent_raw(user='System', mess='Default message'):
-    jscode = f"""const chatBox = document.getElementById("chat-box");const messageElement = document.createElement("p");messageElement.innerHTML = `<strong>{user}:</strong> {mess}`;chatBox.appendChild(messageElement);"""
-    send_js(jscode)'''
 
 def clear_messages():
     conn = sqlite3.connect("chatroom.db")
@@ -62,7 +56,7 @@ def clear_messages():
 def add_message(username, message):
     message = str.encode(message);username = str.encode(username)
     message = cipher_suite.encrypt(message)
-    message = cipher_suite.encrypt(username)
+    username = cipher_suite.encrypt(username)
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
     cursor.execute("INSERT INTO messages (username, message) VALUES (?, ?)", (username, message))
@@ -71,16 +65,23 @@ def add_message(username, message):
 
 @app.route("/")
 def index():
+    newMessageList = [] 
     messages = get_messages()
     if messages:
-        messages = str.encode(messages)
-        messages = cipher_suite.decrypt(messages)
-        messages = messages.decode()
-    return render_template("index.html", messages=messages)
+        for message in messages:
+            Dusername = message[0]
+            Dusername = cipher_suite.decrypt(Dusername)
+            Dusername = Dusername.decode()
+            Dmessage = message[1]
+            Dmessage = cipher_suite.decrypt(Dmessage)
+            Dmessage = Dmessage.decode()
+
+            newMessageList.append((Dusername,Dmessage))
+            
+    return render_template("index.html", messages=newMessageList)
 
 @socketio.on('AdminMessage')
 def handle_admin_message(message_data):
-    print(message_data)
     if message_data['key'] == 'LeonStinks':
         if message_data['message'] == '/wipe':
             clear_messages() 
@@ -88,14 +89,72 @@ def handle_admin_message(message_data):
 @socketio.on('message')
 def handle_message(message_data):
     username = message_data['username']
+    lowerUser = username.lower()
     message = message_data['message']
-    if message_data['username'] in hardBannedNames:
+    if lowerUser in hardBannedNames: 
         send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
     elif message == '/help' or message == '/help ':
-        send_js('''messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong> <span style="color: rgb(198, 201, 204);">Sorry, but the help command is under-construction... :(</span>`''', sid=request.sid)
+        send_js('''const chatBox = document.getElementById("chat-box");const messageElement = document.createElement("p");messageElement.innerHTML = `<strong>System:</strong> The current list of commands are: /help... Thats it :P`;chatBox.appendChild(messageElement);''', sid=request.sid)
+        
     else:
         add_message(username, message)
         send({'username': username, 'message': message}, broadcast=True)
+
+
+
+#Login
+@app.route("/Login")
+def Login():
+    return render_template("Login.html")
+
+def create_table_accounts():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      username TEXT NOT NULL UNIQUE, 
+                      password TEXT NOT NULL)''')
+    conn.commit()
+    conn.close()
+
+create_table_accounts ()
+
+@socketio.on('register')
+def register(data):
+    username = data['username']
+    password = data['password']
+
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+    existing_user = cursor.fetchone()
+    if existing_user:
+        emit('registration_response', {'message': 'Username already exists'})
+    else:
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        conn.close()
+        emit('registration_response', {'message': 'Registration successful'})
+        send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
+
+@socketio.on('login')
+def login(data):
+    username = data['username']
+    password = data['password']
+
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
+    user = cursor.fetchone()
+    conn.close()
+
+    if user:
+        send_js(f'''console.log("Hi");localStorage.setItem("username", "{username}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+    else:
+        emit('login_response', {'message': 'Invalid username or password'})
+
 
 if __name__ == "__main__":
     init_db()
