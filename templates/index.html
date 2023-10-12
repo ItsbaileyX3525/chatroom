@@ -285,6 +285,9 @@ function Logout(){
   localStorage.clear()
   window.location.href = '../Login'
 }
+addEventListener("DOMContentLoaded", (event) => {
+  socket.emit('OnConnect', setUsername)
+});
     </script>
 </body>
 </html>

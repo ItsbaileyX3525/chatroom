@@ -79,7 +79,7 @@ def clear_messages():
     cursor.execute("DELETE FROM messages")
     conn.commit()
     conn.close()
-    send_js("""console.log("Balls");const chatBox = document.getElementById('chat-box');chatBox.innerHTML = ''""")
+    send_js("""const chatBox = document.getElementById('chat-box');chatBox.innerHTML = ''""")
     send({'username': 'System', 'message': 'Admin wiped the message database! (refresh to remove this message)'}, broadcast=True)
 
 
@@ -114,12 +114,12 @@ def index():
 @socketio.on('AdminMessage')
 def handle_admin_message(message_data):
     if message_data['key'] == 'LeonStinks':
-        username = message_data['message']
-        username = username.split()
+        message = message_data['message']
+        message = message.split()
         if message_data['message'] == '/wipe':
             clear_messages()
-        elif username[0] == '/change':
-            change_password(username[1], new_password=username[2])
+        elif message[0] == '/change':
+            change_password(message[1], new_password=message[2])
     else:
         send({'username': "Admin", 'message': message_data['message']}, broadcast=True)
 
@@ -156,6 +156,10 @@ def create_table_accounts():
 
 create_table_accounts ()
 
+@socketio.on('OnConnect')
+def connected(username):
+    send_js(f'''showNotification("{username} has reconncted!")''')
+
 @socketio.on('register')
 def register(data):
     username = data['username']
@@ -178,7 +182,6 @@ def register(data):
         conn.close()
         emit('registration_response', {'message': 'Registration successful'})
         send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
-        send_js(f'''showNotification("{username}")''')
 
 @socketio.on('login')
 def login(data):
@@ -194,7 +197,6 @@ def login(data):
 
     if user:
         send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
-        send_js(f'''showNotification("{username} has joined!")''')
     else:
         emit('login_response', {'message': 'Invalid username or password'})
 
