@@ -12,6 +12,21 @@ cipher_suite = Fernet(key) #setting up the cipher with the key
 encoded_text = cipher_suite.encrypt(b"Hello stackoverflow!") #Used to encrpyt text
 decoded_text = cipher_suite.decrypt(encoded_text) #Used to decrypt 
 
+def read_list_from_file(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as file:
+            # Read the content of the file and convert it to a list
+            content = file.read()
+            my_list = eval(content)
+            return my_list
+    except FileNotFoundError:
+        print(f"The file '{filename}' does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+filename = 'emojis.emo'
+data_list = read_list_from_file(filename)
+
 def epoch_to_dd_mm_yyyy():
     epoch_time = time.time()
     time_struct = time.gmtime(epoch_time)
@@ -20,6 +35,15 @@ def epoch_to_dd_mm_yyyy():
     year = time_struct.tm_year
     formatted_date = "{:02d}/{:02d}/{:04d}".format(day, month, year)
     return formatted_date
+
+def replace_colon_items(input_string, data_list=data_list):
+    import re
+    pattern = r':(.*?):'
+    matches = re.findall(pattern, input_string)
+    for match in matches:
+        if match in data_list:
+            input_string = input_string.replace(f':{match}:', data_list[match])
+    return input_string
 
 #define the application
 app = Flask(__name__)
@@ -106,19 +130,20 @@ def index():
             Dmessage = message[1]
             Dmessage = cipher_suite.decrypt(Dmessage)
             Dmessage = Dmessage.decode()
-
+            Dmessage = replace_colon_items(Dmessage) 
             newMessageList.append((Dusername,Dmessage))
             
     return render_template("index.html", messages=newMessageList)
 
 @socketio.on('AdminMessage')
 def handle_admin_message(message_data):
-    if message_data['key'] == 'LeonStinks':
+    if message_data['key'] == 'AdminKey':
         message = message_data['message']
         message = message.split()
         if message_data['message'] == '/wipe':
             clear_messages()
         elif message[0] == '/change':
+            print("changed " + message[1], "'s password.")
             change_password(message[1], new_password=message[2])
     else:
         send({'username': "Admin", 'message': message_data['message']}, broadcast=True)
@@ -135,11 +160,14 @@ def handle_message(message_data):
         
     else:
         add_message(username, message)
+        message = replace_colon_items(message)
         send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
 
-
-
 #Login
+@app.route('/Test')
+def tests():
+    return render_template('Test.html')
+
 @app.route("/Login")
 def Login():
     return render_template("Login.html")

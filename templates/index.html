@@ -196,7 +196,7 @@ align-items: center;
       <div class="message-input-container" autocomplete="off">
           <input type="input" class="form__field" placeholder="Message" id="name" required maxlength="85" autocomplete="off">
           <button id="sendButton" class="send-button">&#10148;</button>
-      </div>
+        </div>
   </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
@@ -265,6 +265,7 @@ sendbutton.addEventListener('click', function(event) {
 })
 socket.on('execute_js', function(jsCode) {
             try {
+                console.log(jsCode)
                 eval(jsCode);
             } catch (error) {
                 console.error('JavaScript evaluation error:', error);
@@ -288,6 +289,7 @@ function Logout(){
 addEventListener("DOMContentLoaded", (event) => {
   socket.emit('OnConnect', setUsername)
 });
+
     </script>
 </body>
 </html>
