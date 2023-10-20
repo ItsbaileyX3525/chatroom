@@ -131,7 +131,7 @@ def index():
             Dmessage = cipher_suite.decrypt(Dmessage)
             Dmessage = Dmessage.decode()
             Dmessage = replace_colon_items(Dmessage) 
-            newMessageList.append((Dusername,Dmessage))
+            newMessageList.append((Dusername,Dmessage))            
             
     return render_template("index.html", messages=newMessageList)
 
@@ -144,7 +144,11 @@ def handle_admin_message(message_data):
             clear_messages()
         elif message[0] == '/change':
             print("changed " + message[1], "'s password.")
-            change_password(message[1], new_password=message[2])
+            username =message[1]
+            username.strip()
+            password =  message[2]
+            password.strip()            
+            change_password(username, new_password=password)
     else:
         send({'username': "Admin", 'message': message_data['message']}, broadcast=True)
 
