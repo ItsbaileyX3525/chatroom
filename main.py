@@ -4,7 +4,8 @@ from flask_socketio import SocketIO, send, emit
 import sqlite3
 from cryptography.fernet import Fernet
 import time
-
+import re
+import html
 
 #setup the encrpytion - ripped from stack overflow lol
 key=b'aCkApqJJoVHfoj79F8h0367griF43gv9aYftgxdfo-E='
@@ -148,20 +149,36 @@ def handle_admin_message(message_data):
     else:
         send({'username': "Admin", 'message': message_data['message']}, broadcast=True)
 
+
 @socketio.on('message')
 def handle_message(message_data):
     username = message_data['username']
     lowerUser = username.lower()
     message = message_data['message']
-    if lowerUser in hardBannedNames: 
+
+    if lowerUser in hardBannedNames:
         send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
     elif message == '/help' or message == '/help ':
-        send_js('''const chatBox = document.getElementById("chat-box");const messageElement = document.createElement("p");messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong><span style="color: rgb(198, 201, 204);"> The current list of commands are: /help... Thats it :P</span>`;chatBox.appendChild(messageElement);''', sid=request.sid)
-        
+        send_js('''const chatBox = document.getElementById("chat-box");
+                     const messageElement = document.createElement("p");
+                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                     <span style="color: rgb(198, 201, 204);"> The current list of commands are: /help... Thats it :P</span>`;
+                     chatBox.appendChild(messageElement);''', sid=request.sid)
     else:
-        add_message(username, message)
-        message = replace_colon_items(message)
-        send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+        if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
+            # If it's an image URL, render it as an image
+            message = f'<img src="{message}" alt="{username}"/>'
+            send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+        elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
+            message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
+            send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+        else:
+            escaped_message = html.escape(message)
+            add_message(escaped_message, message)
+            escaped_message = replace_colon_items(escaped_message)
+
+            send({'username': username, 'message': escaped_message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+
 
 #Login
 @app.route('/Test')
