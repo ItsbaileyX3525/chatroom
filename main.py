@@ -25,8 +25,7 @@ def read_list_from_file(filename):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-filename = 'emojis.emo'
-data_list = read_list_from_file(filename)
+data_list = read_list_from_file('emojis.emo')
 
 def epoch_to_dd_mm_yyyy():
     epoch_time = time.time()
@@ -59,7 +58,7 @@ def init_db():
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS messages
-                      (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, message TEXT)''')
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, message TEXT, date TEXT)''')
     conn.commit()
     conn.close()
 
@@ -109,13 +108,14 @@ def clear_messages():
 
 
 # Function to add a new message to the database
-def add_message(username, message):
-    message = str.encode(message);username = str.encode(username)
+def add_message(username, message, date):
+    message = str.encode(message);username = str.encode(username);date = str.encode(date)
     message = cipher_suite.encrypt(message)
     username = cipher_suite.encrypt(username)
+    date = cipher_suite.encrypt(date)
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO messages (username, message) VALUES (?, ?)", (username, message))
+    cursor.execute("INSERT INTO messages (username, message, date) VALUES (?, ?)", (username, message))
     conn.commit()
     conn.close()
 
@@ -131,8 +131,11 @@ def index():
             Dmessage = message[1]
             Dmessage = cipher_suite.decrypt(Dmessage)
             Dmessage = Dmessage.decode()
-            Dmessage = replace_colon_items(Dmessage) 
-            newMessageList.append((Dusername,Dmessage))            
+            Dmessage = replace_colon_items(Dmessage)
+            Ddate = message[2]
+            Ddate = cipher_suite.decrypt(Ddate)
+            Ddate = Ddate.decode()
+            newMessageList.append((Dusername,Dmessage,Ddate))
             
     return render_template("index.html", messages=newMessageList)
 
@@ -171,16 +174,15 @@ def handle_message(message_data):
     else:
         if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
             # If it's an image URL, render it as an image
-            message = f'<img src="{message}" alt="{username}"/>'
+            message = f'<img src="{message}" alt="{username} style="width=100%; height=100%"/>'
             send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
         elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
             message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
             send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
         else:
             escaped_message = html.escape(message)
-            add_message(escaped_message, message)
+            add_message(username, escaped_message)
             escaped_message = replace_colon_items(escaped_message)
-
             send({'username': username, 'message': escaped_message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
 
 
@@ -207,7 +209,7 @@ create_table_accounts ()
 
 @socketio.on('OnConnect')
 def connected(username):
-    send_js(f'''showNotification("{username} has reconncted!")''')
+    send_js(f'''showNotification("{username} has conncted!")''')
 
 @socketio.on('register')
 def register(data):

@@ -210,7 +210,7 @@ align-items: center;
         socket.on('message', function(data) {
             const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
-            messageElement.innerHTML = `<span style="color: rgb(198, 201, 204); font-size: 12px;top: 20%;">${data.date} </span><strong style="color: rgb(198, 201, 204);">${data.username}:</strong> <span style="color: rgb(198, 201, 204);">${data.message}</span>`;
+            messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">${data.username}:</strong> <span style="color: rgb(198, 201, 204);">${data.message}</span><span style="color: rgb(198, 201, 204);translate:transformY(20px); font-size: 12px;opacity:.2">${data.date}</span>`;
             chatBox.appendChild(messageElement);
     
             // Scroll to the bottom of the chat box to show the latest message
