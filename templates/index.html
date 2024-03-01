@@ -191,9 +191,8 @@ align-items: center;
       {% for message in messages %}
       <p>
           <strong style="color: rgb(198, 201, 204)">{{ message[0] }}:</strong>
-          <span style="color: rgb(198, 201, 204)">
-              {{ message[1]|safe }}
-          </span>
+          <span style="color: rgb(198, 201, 204)">{{ message[1]|safe }}</span>
+          <span style="color: rgb(198, 201, 204);translate:transformY(20px); font-size: 12px;opacity:.2">{{message[2] }}</span>
       </p>
   {% endfor %}
     </div>

@@ -66,7 +66,7 @@ def init_db():
 def get_messages():
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT username, message FROM messages ORDER BY id ASC")
+    cursor.execute("SELECT username, message, date FROM messages ORDER BY id ASC")
     messages = cursor.fetchall()
     conn.close()
     return messages
@@ -109,13 +109,13 @@ def clear_messages():
 
 # Function to add a new message to the database
 def add_message(username, message, date):
-    message = str.encode(message);username = str.encode(username);date = str.encode(date)
+    message = str.encode(message);username = str.encode(username)
     message = cipher_suite.encrypt(message)
     username = cipher_suite.encrypt(username)
-    date = cipher_suite.encrypt(date)
+    print(date)
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO messages (username, message, date) VALUES (?, ?)", (username, message))
+    cursor.execute("INSERT INTO messages (username, message, date) VALUES (?, ?, ?)", (username, message, date))
     conn.commit()
     conn.close()
 
@@ -125,18 +125,19 @@ def index():
     messages = get_messages()
     if messages:
         for message in messages:
-            Dusername = message[0]
-            Dusername = cipher_suite.decrypt(Dusername)
-            Dusername = Dusername.decode()
-            Dmessage = message[1]
-            Dmessage = cipher_suite.decrypt(Dmessage)
-            Dmessage = Dmessage.decode()
-            Dmessage = replace_colon_items(Dmessage)
-            Ddate = message[2]
-            Ddate = cipher_suite.decrypt(Ddate)
-            Ddate = Ddate.decode()
-            newMessageList.append((Dusername,Dmessage,Ddate))
-            
+            if len(message) >= 3:
+                Dusername = message[0]
+                Dusername = cipher_suite.decrypt(Dusername)
+                Dusername = Dusername.decode()
+                Dmessage = message[1]
+                Dmessage = cipher_suite.decrypt(Dmessage)
+                Dmessage = Dmessage.decode()
+                Dmessage = replace_colon_items(Dmessage)
+                Ddate = message[2]
+                newMessageList.append((Dusername, Dmessage, Ddate))
+            else:
+                print(messages)
+                    
     return render_template("index.html", messages=newMessageList)
 
 @socketio.on('AdminMessage')
@@ -162,6 +163,7 @@ def handle_message(message_data):
     username = message_data['username']
     lowerUser = username.lower()
     message = message_data['message']
+    date = epoch_to_dd_mm_yyyy()
 
     if lowerUser in hardBannedNames:
         send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
@@ -175,15 +177,15 @@ def handle_message(message_data):
         if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
             # If it's an image URL, render it as an image
             message = f'<img src="{message}" alt="{username} style="width=100%; height=100%"/>'
-            send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+            send({'username': username, 'message': message, 'date': date}, broadcast=True)
         elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
             message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
-            send({'username': username, 'message': message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+            send({'username': username, 'message': message, 'date': date}, broadcast=True)
         else:
             escaped_message = html.escape(message)
-            add_message(username, escaped_message)
+            add_message(username, escaped_message, date)
             escaped_message = replace_colon_items(escaped_message)
-            send({'username': username, 'message': escaped_message, 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+            send({'username': username, 'message': escaped_message, 'date': date}, broadcast=True)
 
 
 #Login
