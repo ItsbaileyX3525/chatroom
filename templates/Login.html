@@ -8,8 +8,7 @@
             background-color: #f0f0f0;
             background-image: url('https://i.ibb.co/RcDF34M/background-website.gif');
             background-size: cover;
-            
-            height: 100vh;
+            background-clip:text;
             padding:0;
             margin:0;
         }
@@ -26,28 +25,59 @@
             text-align: center;
         }
         form {
-            text-align: center;
-        }
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
+    text-align: center;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button[type="submit"] {
+    position: relative; /* Position relative for absolute positioning of spinner */
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Added transform transition */
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+button[type="submit"]:hover {
+    background-image: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red, violet);
+    background-size: 200% auto;
+    animation: rainbowBackground 2s linear infinite;
+    transform: translateY(-2px);
+}
+
+@keyframes rainbowBackground {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+
+button[type="submit"]:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+
+@keyframes moveUpDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
     </style>
 </head>
 <body>
@@ -68,6 +98,7 @@
     <div id="message"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+
     <script>
         var socket = io.connect('http://' + document.domain + ':' + location.port);
         socket.on('registration_response', function(data) {
@@ -83,7 +114,10 @@
             var username = document.getElementById('regUsername').value;
             var password = document.getElementById('regPassword').value;
             socket.emit('register', { username: username, password: password });
-        };
+            var button = this;
+            button.setAttribute('disabled', true); // Disable the button to prevent multiple clicks
+            button.style.animation = 'moveUpDown 0.5s ease alternate infinite'; // Added animation for button movement
+       };
 
         document.getElementById('loginForm').onsubmit = function(event) {
             event.preventDefault();

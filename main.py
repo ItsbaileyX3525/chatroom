@@ -3,6 +3,7 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, send, emit
 import sqlite3
 from cryptography.fernet import Fernet
+import bcrypt
 import time
 import re
 import html
@@ -37,7 +38,6 @@ def epoch_to_dd_mm_yyyy():
     return formatted_date
 
 def replace_colon_items(input_string, data_list=data_list):
-    import re
     pattern = r':(.*?):'
     matches = re.findall(pattern, input_string)
     for match in matches:
@@ -90,13 +90,18 @@ def get_password(username):
         return None
 
 def change_password(username, new_password):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
-    cursor.execute("UPDATE users SET password=? WHERE username=?", (new_password, username))
-    conn.commit()
-    conn.close()
-    return True
-
+    try:
+        hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET password=? WHERE username=?", (hashed_password, username))
+        conn.commit()
+        conn.close()
+        return True
+    except:
+        return False
+    
+#Clear out the entire database of chats in case of anything
 def clear_messages():
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
@@ -104,7 +109,29 @@ def clear_messages():
     conn.commit()
     conn.close()
     send_js("""const chatBox = document.getElementById('chat-box');chatBox.innerHTML = ''""")
-    send({'username': 'System', 'message': 'Admin wiped the message database! (refresh to remove this message)'}, broadcast=True)
+    send({'username': 'System', 'message': 'Admin wiped the message database! (refresh to remove this message)', 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+
+#Wipe all the databases (messasges and users)
+def wipeEverything():
+    print("Wiped completely")
+    #Wipe messages
+    conn = sqlite3.connect("chatroom.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM messages")
+    conn.commit()
+    conn.close()
+
+    #Wipe usernames and passwords
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users")
+    conn.commit()
+    conn.close()
+
+    send_js('''setTimeout(function(){
+            Logout()
+    }, 5000);showNotification("Admin wiped everything, signing out in 3 seconds")
+           ''')
 
 
 # Function to add a new message to the database
@@ -142,6 +169,7 @@ def index():
 
 @socketio.on('AdminMessage')
 def handle_admin_message(message_data):
+    date = epoch_to_dd_mm_yyyy()
     if message_data['key'] == 'AdminKey':
         message = message_data['message']
         message = message.split()
@@ -152,11 +180,67 @@ def handle_admin_message(message_data):
             username =message[1]
             username.strip()
             password =  message[2]
-            password.strip()            
+            password.strip() 
             change_password(username, new_password=password)
     else:
-        send({'username': "Admin", 'message': message_data['message']}, broadcast=True)
+        send({'username': "Admin", 'message': message_data['message'], 'date': date}, broadcast=True)
 
+def handleCommands(input, args=None, username=None):
+    if input == '/help':
+        send_js(f'''const chatBox = document.getElementById("chat-box");
+                    const messageElement = document.createElement("p");
+                    messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (New password)" if args == "changePwd" else None} </span>`;
+                    chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/emojis':
+        send_js('''const chatBox = document.getElementById("chat-box");
+                     const messageElement = document.createElement("p");
+                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                     <span style="color: rgb(198, 201, 204);"> To use emojis it's like discord, so it's :skull: to see a list of popular emojis use /emojiList </span>`;
+                     chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/emojiList':
+        send_js('''const chatBox = document.getElementById("chat-box");
+                     const messageElement = document.createElement("p");
+                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                     <span style="color: rgb(198, 201, 204);"> The top 4 used are: :skull:, :smile:, :cry:, :thumbs_up: to see all of them use /fullEmojiList </span>`;
+                     chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/fullEmojiList':
+        send_js('''const chatBox = document.getElementById("chat-box");
+                     const messageElement = document.createElement("p");
+                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                     <span style="color: rgb(198, 201, 204);"> Enjoy :)\nJk lol I'm not going to flood you with 900 lines of emojis but you can view the emoji list from <a target="_blank" href="https://pastebin.com/1b0QnGxg">here</a></span>`;
+                     chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/changePwd':
+        success = change_password(username, args)
+        send_js(f'''const chatBox = document.getElementById("chat-box");
+                     const messageElement = document.createElement("p");
+                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                     <span style="color: rgb(198, 201, 204);"> {f'Successfully changed password to {args}' if success else f'Failed to change the password to {args}' } </span>`;
+                     chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/wipe':
+        if args == 'AdminKey':
+            clear_messages()
+        else:
+            send_js('''const chatBox = document.getElementById("chat-box");
+                const messageElement = document.createElement("p");
+                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. </span>`;
+                chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/destroyAll':
+        if args == "AdminKey":
+            wipeEverything()
+        else:
+            send_js('''const chatBox = document.getElementById("chat-box");
+                const messageElement = document.createElement("p");
+                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. </span>`;
+                chatBox.appendChild(messageElement);''', sid=request.sid)
+    else:
+        send_js('''const chatBox = document.getElementById("chat-box");
+                const messageElement = document.createElement("p");
+                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                <span style="color: rgb(198, 201, 204);"> Sorry I don't believe that is a command, perhaps check your spelling? </span>`;
+                chatBox.appendChild(messageElement);''', sid=request.sid)
 
 @socketio.on('message')
 def handle_message(message_data):
@@ -164,21 +248,32 @@ def handle_message(message_data):
     lowerUser = username.lower()
     message = message_data['message']
     date = epoch_to_dd_mm_yyyy()
+    trimmedMessage = message.split()
 
     if lowerUser in hardBannedNames:
         send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
-    elif message == '/help' or message == '/help ':
-        send_js('''const chatBox = document.getElementById("chat-box");
-                     const messageElement = document.createElement("p");
-                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                     <span style="color: rgb(198, 201, 204);"> The current list of commands are: /help... Thats it :P</span>`;
-                     chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif trimmedMessage[0].startswith("/"):
+        parts = message.split(" ", 1)
+        print(parts)
+        if len(parts) > 2:
+            send_js('''const chatBox = document.getElementById("chat-box");
+                const messageElement = document.createElement("p");
+                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                <span style="color: rgb(198, 201, 204);"> Error: Password cannot contain spaces. </span>`;
+                chatBox.appendChild(messageElement);''', sid=request.sid)
+        else:
+            try:
+                handleCommands(parts[0],parts[1],username)
+            except:
+                handleCommands(parts[0])
     else:
         if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
             # If it's an image URL, render it as an image
-            message = f'<img src="{message}" alt="{username} style="width=100%; height=100%"/>'
+            message = f'<img src="{message}" alt="{username} style="width=80%; height=80%"/>'
             send({'username': username, 'message': message, 'date': date}, broadcast=True)
+            add_message(username, message, date)
         elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
+            #Same with a video URL
             message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
             send({'username': username, 'message': message, 'date': date}, broadcast=True)
         else:
@@ -189,10 +284,6 @@ def handle_message(message_data):
 
 
 #Login
-@app.route('/Test')
-def tests():
-    return render_template('Test.html')
-
 @app.route("/Login")
 def Login():
     return render_template("Login.html")
@@ -230,7 +321,9 @@ def register(data):
     elif existing_user:
         emit('registration_response', {'message': 'Username already exists'})
     else:
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        # Hashing password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
         conn.commit()
         conn.close()
         emit('registration_response', {'message': 'Registration successful'})
@@ -244,11 +337,10 @@ def login(data):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
-    user = cursor.fetchone()
-    conn.close()
+    cursor.execute("SELECT password FROM users WHERE username=?", (username,))
+    hashed_password = cursor.fetchone()
 
-    if user:
+    if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
     else:
         emit('login_response', {'message': 'Invalid username or password'})
@@ -256,4 +348,4 @@ def login(data):
 
 if __name__ == "__main__":
     init_db()
-    socketio.run(app, debug=True, host='0.0.0.0')
+    socketio.run(app, debug=True, host='0.0.0.0',port=5000)
