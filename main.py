@@ -198,7 +198,12 @@ def handle_admin_message(message_data):
 
 sounds={
     "hellNaw":'"hellNaw"',
-    "clang":'"clang"'
+    "clang":'"clang"',
+    "mew":'"mew"',
+    "boom":'"boom"',
+    "whatDaDogDoin":'"whatDaDogDoin"',
+    "pluh":'"pluh"',
+    "gay":'"gay"'
 }
 
 def handleCommands(input, args=None, username=None):
@@ -212,7 +217,7 @@ def handleCommands(input, args=None, username=None):
         send_js(f'''const chatBox = document.getElementById("chat-box");
                     const messageElement = document.createElement("p");
                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList, /play, /playList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (New password)" if args == "changePwd" or args=='/changePwd' else 'Syntax is /play (sound name), example /play hellNaw' if args=='/play' or args=='play' else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} </span>`;
+                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList, /play, /playList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (NewPassword)" if args == "changePwd" or args=='/changePwd' else 'Syntax is /play (soundName), example /play hellNaw' if args=='/play' or args=='play' else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} </span>`;
                     chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/emojis':
         send_js('''const chatBox = document.getElementById("chat-box");
@@ -255,7 +260,7 @@ def handleCommands(input, args=None, username=None):
         send_js('''const chatBox = document.getElementById("chat-box");
                 const messageElement = document.createElement("p");
                 messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Current list of sounds are: 'hellNaw' and 'clang'. </span>`;
+                <span style="color: rgb(198, 201, 204);"> Current list of sounds are: 'hellNaw', 'clang', 'gay', 'pluh', 'whatDaDogDoin', 'boom' and 'mew'. </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/destroyAll':
         if args == "AdminKey":
@@ -336,13 +341,18 @@ def handle_message(message_data):
 def Login():
     return render_template("Login.html")
 
+@app.route("/PrivacyPolicy")
+def PrivacyPolicy():
+    return render_template("PrivacyPolicy.html")
+
 def create_table_accounts():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS users
                       (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                       username TEXT NOT NULL UNIQUE, 
-                      password TEXT NOT NULL)''')
+                      password TEXT NOT NULL,
+                      agreement TEXT NOT NULL)''')
     conn.commit()
     conn.close()
 
@@ -356,6 +366,8 @@ def connected(username):
 def register(data):
     username = data['username']
     password = data['password']
+    agreement = data['agreed']
+    print(agreement)
     Dusername = username.lower()
     Dusername = Dusername.strip()
 
@@ -367,11 +379,13 @@ def register(data):
     if Dusername in hardBannedNames:
         emit('registration_response', {'message': 'Reserved username.'})
     elif existing_user:
-        emit('registration_response', {'message': 'Username already exists'})
+        emit('registration_response', {'message': 'Username already exists.'})
+    elif agreement != "yes":
+        emit('registration_response', {'message': 'Please agree to the privacy policy and consent service.'})
     else:
         # Hashing password
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+        cursor.execute("INSERT INTO users (username, password, agreement) VALUES (?, ?, ?)", (username, hashed_password, agreement))
         conn.commit()
         conn.close()
         emit('registration_response', {'message': 'Registration successful'})
@@ -387,9 +401,14 @@ def login(data):
 
     cursor.execute("SELECT password FROM users WHERE username=?", (username,))
     hashed_password = cursor.fetchone()
-
+    cursor.execute("SELECT agreement FROM users WHERE username=?", (username,))
+    agreed = cursor.fetchone()
+    conn.close()
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
-        send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+        if agreed[0] == 'yes':
+            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+        else:
+           emit('login_response', {'message': 'Account has not agreed to privacy policy, please contact Admin or create new account'}) 
     else:
         emit('login_response', {'message': 'Invalid username or password'})
 

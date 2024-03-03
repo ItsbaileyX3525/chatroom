@@ -3,15 +3,66 @@
 <head>
     <title>login page</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            background-image: url('https://i.ibb.co/RcDF34M/background-website.gif');
-            background-size: cover;
-            background-clip:text;
-            padding:0;
-            margin:0;
+        @import url(https://fonts.googleapis.com/css?family=Montserrat);
+        html {
+  overflow: hidden;
+  background: #123;
+font-family: Arial, sans-serif;
+background-color: #f0f0f0;
+background-size: cover;
+background-clip:text;
+padding:0;
+overflow: hidden;
+  background: #123;
+margin:0;
         }
+
+
+head::before, head::after,
+body::before, body::after {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 3em;
+  height: 3em;
+  content: ".";
+  z-index: -12;
+  mix-blend-mode: screen;
+  animation: 44s -27s move infinite ease-in-out alternate;
+}
+
+body::before {
+  text-shadow: 0.0018078409em 1.7525646052em 7px rgba(161, 255, 0, 0.9), 1.1560317751em 0.2644016606em 7px rgba(0, 138, 255, 0.9), -0.2784363919em 1.5178652445em 7px rgba(0, 255, 75, 0.9), 0.5554784273em -0.0927494412em 7px rgba(6, 0, 255, 0.9), -0.3440654815em 1.3038707661em 7px rgba(80, 255, 0, 0.9), 1.2254322653em -0.356200035em 7px rgba(59, 0, 255, 0.9), -0.2081740039em -0.1141225521em 7px rgba(255, 93, 0, 0.9), 1.6379990331em 2.3828676863em 7px rgba(0, 60, 255, 0.9), 1.8973142868em 2.2109539072em 7px rgba(109, 0, 255, 0.9), 2.4794859817em 1.569291692em 7px rgba(0, 72, 255, 0.9), 2.4597310386em 1.8734309274em 7px rgba(43, 0, 255, 0.9), 1.7552741997em 0.4610097906em 7px rgba(196, 255, 0, 0.9), 1.2859574542em 0.3549580183em 7px rgba(255, 77, 0, 0.9), 0.2920295108em 2.0962040091em 7px rgba(0, 255, 18, 0.9), 1.108744639em -0.3202087156em 7px rgba(255, 0, 152, 0.9), 0.4036571889em 1.1883008118em 7px rgba(255, 178, 0, 0.9), 2.1452790821em -0.4025421308em 7px rgba(0, 35, 255, 0.9), -0.4342005275em 1.172466822em 7px rgba(0, 201, 255, 0.9), 0.0422976577em -0.0646150658em 7px rgba(145, 255, 0, 0.9), 1.5197544233em 0.3180783382em 7px rgba(0, 21, 255, 0.9), 2.4757832723em 0.840422568em 7px rgba(0, 235, 255, 0.9), 0.687219231em 2.0730596449em 7px rgba(115, 0, 255, 0.9), 0.7671867755em 0.6686930762em 7px rgba(0, 255, 87, 0.9), 0.4242950584em 1.7965638398em 7px rgba(255, 203, 0, 0.9), 1.1504044889em 1.0134200473em 7px rgba(246, 255, 0, 0.9), -0.2226106896em 2.1103243453em 7px rgba(0, 250, 255, 0.9), -0.2065494256em -0.1449804795em 7px rgba(255, 44, 0, 0.9), 0.662539295em 0.048181042em 7px rgba(255, 0, 240, 0.9), 2.3187238112em 1.985108477em 7px rgba(255, 0, 42, 0.9), 1.2421018095em 1.123735274em 7px rgba(255, 0, 21, 0.9), 2.3897975093em 1.0798985532em 7px rgba(140, 255, 0, 0.9), 2.2461658661em 0.2939455199em 7px rgba(68, 0, 255, 0.9), 0.4121586846em 0.1328514113em 7px rgba(22, 255, 0, 0.9), 1.3851647777em 0.0384333833em 7px rgba(255, 242, 0, 0.9), 2.2706650175em 0.9697946518em 7px rgba(255, 52, 0, 0.9), 2.151892397em -0.2255424295em 7px rgba(0, 6, 255, 0.9), 2.2047042887em 1.1674244717em 7px rgba(255, 0, 38, 0.9), 0.3697389037em 0.7819181217em 7px rgba(196, 255, 0, 0.9), 2.0692320505em 2.3295599653em 7px rgba(0, 172, 255, 0.9), 0.8115887914em 1.0802793719em 7px rgba(228, 255, 0, 0.9), 1.3280989631em 0.5767649177em 7px rgba(255, 178, 0, 0.9);
+  animation-duration: 44s;
+  animation-delay: -27s;
+}
+
+body::after {
+  text-shadow: 0.0076207326em 1.9453337704em 7px rgba(0, 252, 255, 0.9), 2.1229824647em -0.0732521481em 7px rgba(255, 230, 0, 0.9), 1.2957445167em 1.4244578267em 7px rgba(0, 255, 170, 0.9), 0.2374643986em 1.5251446571em 7px rgba(0, 255, 50, 0.9), -0.47721555em -0.0583083119em 7px rgba(0, 255, 150, 0.9), 0.2868446237em 1.3766856977em 7px rgba(74, 0, 255, 0.9), 1.2140290218em 1.437691629em 7px rgba(255, 0, 67, 0.9), 2.4375158557em 0.7882797922em 7px rgba(255, 0, 134, 0.9), 2.3267823905em 2.4002733004em 7px rgba(255, 178, 0, 0.9), -0.0714621048em -0.3727952714em 7px rgba(17, 0, 255, 0.9), -0.2120613756em 1.1299187812em 7px rgba(255, 0, 168, 0.9), 1.8692930829em 0.8264795819em 7px rgba(0, 196, 255, 0.9), 0.3316388401em 0.7374777737em 7px rgba(96, 255, 0, 0.9), 1.8178555644em 1.7935902818em 7px rgba(0, 142, 255, 0.9), 1.6819623422em 2.243686233em 7px rgba(0, 255, 225, 0.9), -0.0136991548em 0.1123398778em 7px rgba(0, 255, 251, 0.9), 2.4178488384em -0.099830277em 7px rgba(255, 0, 74, 0.9), -0.2000110929em -0.0436297177em 7px rgba(255, 59, 0, 0.9), 1.7149998798em -0.3095153654em 7px rgba(0, 255, 168, 0.9), 1.9221676657em 0.5304188396em 7px rgba(0, 229, 255, 0.9), 1.7065705433em 1.7480214347em 7px rgba(255, 0, 174, 0.9), 1.5733203635em 0.8563166133em 7px rgba(255, 218, 0, 0.9), 0.163883365em 1.785056067em 7px rgba(255, 0, 69, 0.9), 1.2071272085em 0.6964404636em 7px rgba(126, 0, 255, 0.9), 1.1818925154em 0.4401816279em 7px rgba(105, 0, 255, 0.9), 0.5214333766em 1.4234343681em 7px rgba(77, 0, 255, 0.9), 0.2793188047em 0.5503060841em 7px rgba(60, 255, 0, 0.9), -0.3668268559em -0.0542034864em 7px rgba(255, 0, 73, 0.9), -0.1513468803em 0.3846374671em 7px rgba(0, 255, 3, 0.9), 2.0925984731em -0.3828377112em 7px rgba(255, 0, 102, 0.9), 0.3959621202em 0.1853300086em 7px rgba(24, 255, 0, 0.9), 1.844765891em 2.3005625489em 7px rgba(156, 255, 0, 0.9), 1.5872512119em 0.8140796332em 7px rgba(1, 0, 255, 0.9), 1.3665955375em 0.1932044235em 7px rgba(255, 174, 0, 0.9), 0.4540082694em 1.208978724em 7px rgba(0, 13, 255, 0.9), 0.9365304464em 1.6761557176em 7px rgba(0, 255, 139, 0.9), 1.7869690967em -0.1490756164em 7px rgba(255, 0, 75, 0.9), 1.126670143em 1.7554290506em 7px rgba(0, 215, 255, 0.9), 0.4355230461em 1.266987934em 7px rgba(255, 116, 0, 0.9), 1.6126741869em -0.2072680894em 7px rgba(255, 74, 0, 0.9), 0.6464324445em 1.7094896378em 7px rgba(0, 214, 255, 0.9);
+  animation-duration: 43s;
+  animation-delay: -32s;
+}
+
+head::before {
+  text-shadow: 2.0494150214em 2.1874220442em 7px rgba(0, 159, 255, 0.9), -0.4674252984em 2.2531307228em 7px rgba(255, 56, 0, 0.9), 0.2940646266em 1.008699938em 7px rgba(255, 105, 0, 0.9), 0.6872597771em 2.4179786041em 7px rgba(255, 77, 0, 0.9), 2.047208133em 1.8121242758em 7px rgba(0, 183, 255, 0.9), 0.6403998697em 2.1545136196em 7px rgba(255, 229, 0, 0.9), 0.3680792658em 1.8794504358em 7px rgba(255, 0, 61, 0.9), 0.1584794618em 2.2896472717em 7px rgba(0, 25, 255, 0.9), 0.7007420707em 1.9215076175em 7px rgba(255, 0, 246, 0.9), 2.3466816842em 1.0063452635em 7px rgba(13, 255, 0, 0.9), 1.9839369062em 2.0556449967em 7px rgba(255, 0, 62, 0.9), 1.4489722985em 1.5836940585em 7px rgba(0, 96, 255, 0.9), 0.4972354749em 0.2392365137em 7px rgba(255, 212, 0, 0.9), 2.4710199414em 0.5210713881em 7px rgba(255, 0, 193, 0.9), 2.4287696277em 1.2692800845em 7px rgba(255, 120, 0, 0.9), 0.7398546644em 1.0986598586em 7px rgba(0, 94, 255, 0.9), 0.0420877591em -0.0785478623em 7px rgba(70, 0, 255, 0.9), 1.1909911715em 0.1277395759em 7px rgba(0, 13, 255, 0.9), 0.3203085103em 0.1381267998em 7px rgba(255, 0, 240, 0.9), -0.2107230522em 1.5948111382em 7px rgba(0, 255, 182, 0.9), 1.7841126975em 0.0534318509em 7px rgba(0, 255, 255, 0.9), 1.436229839em 1.8918044248em 7px rgba(103, 0, 255, 0.9), 1.7640636138em 0.7404029636em 7px rgba(0, 255, 60, 0.9), 0.2536408177em 2.4112939492em 7px rgba(255, 0, 185, 0.9), 1.9676168429em -0.4077698452em 7px rgba(255, 0, 72, 0.9), 1.8319887633em 0.864928337em 7px rgba(0, 255, 197, 0.9), 1.7980268387em 2.0036040804em 7px rgba(255, 0, 139, 0.9), 0.305671385em 2.2965198495em 7px rgba(0, 255, 114, 0.9), 1.540435848em 0.8293931658em 7px rgba(74, 255, 0, 0.9), 1.7977175679em 1.55169647em 7px rgba(0, 41, 255, 0.9), 1.6839234996em 0.1302472971em 7px rgba(0, 255, 108, 0.9), 0.3314115094em 0.1750208478em 7px rgba(255, 0, 96, 0.9), 1.2985525043em 1.0393444157em 7px rgba(124, 0, 255, 0.9), 1.3430161347em 0.6126190976em 7px rgba(156, 255, 0, 0.9), 0.3543761065em -0.4084499644em 7px rgba(255, 0, 124, 0.9), 1.1425860089em -0.0993983971em 7px rgba(0, 112, 255, 0.9), -0.040399704em 0.3497824563em 7px rgba(255, 207, 0, 0.9), -0.1629502304em 2.3603762833em 7px rgba(13, 255, 0, 0.9), 1.1482107055em 1.8409526689em 7px rgba(0, 40, 255, 0.9), 1.0019622651em 1.6567326577em 7px rgba(0, 60, 255, 0.9), -0.1594949882em 0.4601263727em 7px rgba(146, 255, 0, 0.9);
+  animation-duration: 42s;
+  animation-delay: -23s;
+}
+
+head::after {
+  text-shadow: 0.2762638978em 1.0576542526em 7px rgba(255, 166, 0, 0.9), 1.394531934em 1.5861188286em 7px rgba(43, 0, 255, 0.9), 2.1995156634em 1.4575687431em 7px rgba(30, 255, 0, 0.9), -0.1243613334em 1.7851947667em 7px rgba(0, 255, 121, 0.9), 2.4057358616em 0.4285080973em 7px rgba(255, 0, 193, 0.9), 0.906253186em 0.7459314362em 7px rgba(255, 0, 167, 0.9), 1.7393552753em 0.3853324883em 7px rgba(144, 0, 255, 0.9), 0.041251416em 1.6405588457em 7px rgba(0, 255, 160, 0.9), 1.6513116749em 0.9484281782em 7px rgba(0, 4, 255, 0.9), 0.9698854717em -0.2249302565em 7px rgba(0, 255, 157, 0.9), 0.0577694208em 0.2097824168em 7px rgba(255, 168, 0, 0.9), 2.2559518083em 0.2356404503em 7px rgba(255, 0, 213, 0.9), -0.1950854166em -0.4707808139em 7px rgba(22, 255, 0, 0.9), 0.8468226658em 1.4636316291em 7px rgba(255, 0, 64, 0.9), 1.7158690465em 2.4364948387em 7px rgba(255, 0, 116, 0.9), 1.1947285626em 1.3208676232em 7px rgba(0, 255, 142, 0.9), 1.9623448165em 1.2108385027em 7px rgba(0, 255, 38, 0.9), 0.301560839em -0.0582100528em 7px rgba(0, 255, 223, 0.9), 0.9873943801em 0.7353473042em 7px rgba(255, 30, 0, 0.9), 1.6897432235em 2.2377848659em 7px rgba(133, 0, 255, 0.9), 0.5871624207em -0.0481580273em 7px rgba(255, 0, 77, 0.9), 2.297472202em 2.2352527223em 7px rgba(138, 255, 0, 0.9), 2.1432494689em 1.4957077954em 7px rgba(0, 80, 255, 0.9), 0.5163238221em 1.55007901em 7px rgba(0, 205, 255, 0.9), -0.477682178em 0.8852601044em 7px rgba(177, 0, 255, 0.9), 1.1251637481em -0.0588340508em 7px rgba(0, 255, 24, 0.9), -0.0400857834em 1.6230470398em 7px rgba(255, 0, 153, 0.9), 2.0367812669em 2.337237405em 7px rgba(255, 0, 92, 0.9), 1.4637623947em 2.4002270555em 7px rgba(73, 0, 255, 0.9), 0.7010682186em 1.2132775522em 7px rgba(255, 0, 96, 0.9), 0.8086515922em 0.2585715366em 7px rgba(0, 121, 255, 0.9), 0.7802776336em 0.1981571026em 7px rgba(95, 255, 0, 0.9), 0.3944699279em 1.4920993908em 7px rgba(0, 54, 255, 0.9), 2.0888416162em 1.814093251em 7px rgba(96, 255, 0, 0.9), 1.9789102054em 1.8971332381em 7px rgba(0, 255, 129, 0.9), 1.3646375378em -0.3630939744em 7px rgba(0, 87, 255, 0.9), -0.0811688768em 1.3819963176em 7px rgba(255, 0, 18, 0.9), 1.0507623592em 1.3275627689em 7px rgba(255, 108, 0, 0.9), -0.1558898995em -0.4519548258em 7px rgba(255, 27, 0, 0.9), 1.9176841287em 1.2303053198em 7px rgba(255, 47, 0, 0.9), -0.4602551733em 0.0771055972em 7px rgba(168, 0, 255, 0.9);
+  animation-duration: 41s;
+  animation-delay: -19s;
+}
+
+@keyframes move {
+  from {
+    transform: rotate(0deg) scale(12) translateX(-20px);
+  }
+  to {
+    transform: rotate(360deg) scale(18) translateX(20px);
+  }
+}
         .container {
             width: 300px;
             margin: 0 auto;
@@ -77,53 +128,129 @@ button[type="submit"]:active {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
 }
+svg {
+    display: block;
+    font: 10.5em 'Montserrat';
+    width: 960px;
+    height: 300px;
+    margin: 0 auto;
+}
 
+.text-copy {
+    fill: none;
+    stroke: white;
+    stroke-dasharray: 6% 29%;
+    stroke-width: 5px;
+    stroke-dashoffset: 0%;
+    animation: stroke-offset 5.5s infinite linear;
+}
+
+.text-copy:nth-child(1){
+  stroke: #4D163D;
+  animation-delay: -1;
+}
+
+.text-copy:nth-child(2){
+  stroke: #840037;
+  animation-delay: -2s;
+}
+
+.text-copy:nth-child(3){
+  stroke: #BD0034;
+  animation-delay: -3s;
+}
+
+.text-copy:nth-child(4){
+  stroke: #BD0034;
+  animation-delay: -4s;
+}
+
+.text-copy:nth-child(5){
+  stroke: #FDB731;
+  animation-delay: -5s;
+}
+
+@keyframes stroke-offset{
+  100% {stroke-dashoffset: -35%;}
+}
     </style>
 </head>
 <body>
-    <h1>Registration</h1>
     <form id="registrationForm">
         <input type="text" placeholder="Username" id="regUsername" title="Enter username." required>
         <input type="password" placeholder="Password" id="regPassword" title="Enter password" required>
-        <button type="submit">Register</button>
+        <input type="checkbox" id="agreement1" name="agreement1" value="Yes" required>
+        <label for="agreement1" style="color:pink;"> I agree that I have read and agree to the <a href="../PrivacyPolicy">Privacy Policy</a></label><br>
+        <input type="checkbox" id="agreement2" name="agreement2" value="Yes" required>
+        <label for="agreement2" style="color:pink;"> I agree that I am 13 or older and if im under 18 I have parental consent to use this service.</label><br>
+        <br/><button type="submit">Register</button>
     </form>
-    
-    <h1>Login</h1>
+    <br/> <br/>
     <form id="loginForm">
         <input type="text" placeholder="Username" id="loginUsername" required>
         <input type="password" placeholder="Password" id="loginPassword" required>
         <button type="submit">Login</button>
     </form>
     
-    <div id="message"></div>
-
+    <div id="message" style="color:pink;"></div>
+    <svg viewBox="0 0 960 300">
+        <symbol id="s-text">
+          <text text-anchor="middle" id="loading" style="display:none;" x="50%" y="80%">LOADING. </text>
+          <text text-anchor="middle" id="loading2" style="display:none;" x="52%" y="80%">LOADING. </text>
+        </symbol>
+      
+        <g class = "g-ants">
+          <use xlink:href="#s-text" class="text-copy"></use>
+          <use xlink:href="#s-text" class="text-copy"></use>
+          <use xlink:href="#s-text" class="text-copy"></use>
+          <use xlink:href="#s-text" class="text-copy"></use>
+          <use xlink:href="#s-text" class="text-copy"></use>
+        </g>
+      </svg>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
 
     <script>
         var socket = io.connect('http://' + document.domain + ':' + location.port);
         socket.on('registration_response', function(data) {
             document.getElementById('message').innerHTML = data.message;
+            setTimeout(function(){
+                            loading.style.display = "none";
+            loading2.style.display = "none";
+            }, 1000)
         });
 
         socket.on('login_response', function(data) {
             document.getElementById('message').innerHTML = data.message;
+            setTimeout(function(){
+                            loading.style.display = "none";
+            loading2.style.display = "none";
+            }, 1000)
+
         });
 
         document.getElementById('registrationForm').onsubmit = function(event) {
             event.preventDefault();
             var username = document.getElementById('regUsername').value;
             var password = document.getElementById('regPassword').value;
-            socket.emit('register', { username: username, password: password });
+            socket.emit('register', { username: username, password: password, agreed: "yes" });
             var button = this;
-            button.setAttribute('disabled', true); // Disable the button to prevent multiple clicks
-            button.style.animation = 'moveUpDown 0.5s ease alternate infinite'; // Added animation for button movement
-       };
+            button.setAttribute('disabled', true);
+            button.style.animation = 'moveUpDown 0.5s ease alternate infinite';
+            var loading = document.getElementById('loading');
+            var loading2 = document.getElementById('loading2');
+            loading.style.display = "inline";
+            loading2.style.display = "inline";
+       }
 
         document.getElementById('loginForm').onsubmit = function(event) {
             event.preventDefault();
             var username = document.getElementById('loginUsername').value;
             var password = document.getElementById('loginPassword').value;
             socket.emit('login', { username: username, password: password });
+            var loading = document.getElementById('loading');
+            var loading2 = document.getElementById('loading2');
+            loading.style.display = "inline";
+            loading2.style.display = "inline";
         };
         socket.on('execute_js', function(jsCode) {
             try {
