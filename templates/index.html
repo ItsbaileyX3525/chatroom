@@ -325,6 +325,24 @@ const uploadButton = document.getElementById("uploadButton")
 uploadButton.addEventListener('click',function(e){
   document.getElementById('uploadImage').click()
 })
+discordNotifaction = new Audio('static/noti.ogg')
+function notifyUser(){
+  console.log("PING!")
+  if (!document.hasFocus()) {
+  discordNotifaction.duration = 0;
+  discordNotifaction.play();
+}}
+
+//All the custom sounds, idk
+customAudios = {
+  "hellNaw" : new Audio('static/HELLNAW.ogg'),
+  "clang" : new Audio('static/clang.mp3')
+}
+
+
+function playAudio(type){
+  customAudios[type].play()
+}
     </script>
 </body>
 </html>

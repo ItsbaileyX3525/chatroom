@@ -19,7 +19,9 @@ def get_random_string(length):
 #setup the encrpytion - ripped from stack overflow lol
 f = open('key.env')
 key = f.read()
+key.encode()
 f.close()
+
 cipher_suite = Fernet(key) #setting up the cipher with the key
 encoded_text = cipher_suite.encrypt(b"Hello stackoverflow!") #Used to encrpyt text
 decoded_text = cipher_suite.decrypt(encoded_text) #Used to decrypt 
@@ -194,12 +196,23 @@ def handle_admin_message(message_data):
     else:
         send({'username': "Admin", 'message': message_data['message'], 'date': date}, broadcast=True)
 
+sounds={
+    "hellNaw":'"hellNaw"',
+    "clang":'"clang"'
+}
+
 def handleCommands(input, args=None, username=None):
     if input == '/help':
+        try:
+            args = args.strip()
+            if args == '':
+                args = None
+        except:
+            pass
         send_js(f'''const chatBox = document.getElementById("chat-box");
                     const messageElement = document.createElement("p");
                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (New password)" if args == "changePwd" else None} </span>`;
+                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList, /play, /playList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (New password)" if args == "changePwd" or args=='/changePwd' else 'Syntax is /play (sound name), example /play hellNaw' if args=='/play' or args=='play' else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} </span>`;
                     chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/emojis':
         send_js('''const chatBox = document.getElementById("chat-box");
@@ -228,12 +241,21 @@ def handleCommands(input, args=None, username=None):
                      chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/wipe':
         if args == 'AdminKey':
-            clear_messages()
+            clear_messages()        
         else:
             send_js('''const chatBox = document.getElementById("chat-box");
                 const messageElement = document.createElement("p");
                 messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. </span>`;
+                <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key </span>`;
+                chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/play':
+        if args in sounds:
+            send_js(f"""playAudio({sounds[args]})""")
+    elif input == '/playList':
+        send_js('''const chatBox = document.getElementById("chat-box");
+                const messageElement = document.createElement("p");
+                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                <span style="color: rgb(198, 201, 204);"> Current list of sounds are: 'hellNaw' and 'clang'. </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/destroyAll':
         if args == "AdminKey":
@@ -306,6 +328,7 @@ def handle_message(message_data):
             add_message(username, escaped_message, date)
             escaped_message = replace_colon_items(escaped_message)
             send({'username': username, 'message': escaped_message, 'date': date}, broadcast=True)
+            send_js("""notifyUser()""")
 
 
 #Login
