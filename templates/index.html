@@ -192,7 +192,6 @@ align-items: center;
 .button-9:focus {
   box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 6px 15px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
 }
-
     </style>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
@@ -211,7 +210,7 @@ align-items: center;
     </div>
     <div class="form__group field" autocomplete="off">
       <div class="message-input-container" autocomplete="off">
-          <span id="UploadButton"><img style="width:50px;height:50px" src="https://i.ibb.co/wSj1wZV/upload.png"/></span>
+        <label><img id="uploadButton" style="width:50px;height:50px" src="https://i.ibb.co/wSj1wZV/upload.png"></img></label><input type='file' style="visibility: hidden ; display: none;" id="uploadImage" onchange="handleUpload();" ></input>
           <input type="input" class="form__field" placeholder="Message" id="name" required maxlength="800" autocomplete="off">
           <button id="sendButton" class="send-button">&#10148;</button>
         </div>
@@ -307,7 +306,25 @@ function Logout(){
 addEventListener("DOMContentLoaded", (event) => {
   socket.emit('OnConnect', setUsername)
 });
+function handleUpload() {
+    const input = document.getElementById('uploadImage');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
 
+        reader.onload = function (e) {
+            const base64Image = e.target.result;
+            socket.emit("imageUpload", [base64Image, setUsername])
+        };
+
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        console.error('No image selected.');
+    }
+}
+const uploadButton = document.getElementById("uploadButton")
+uploadButton.addEventListener('click',function(e){
+  document.getElementById('uploadImage').click()
+})
     </script>
 </body>
 </html>

@@ -7,9 +7,19 @@ import bcrypt
 import time
 import re
 import html
+import base64 
+import random
+import string
+
+def get_random_string(length):
+    letters = string.ascii_lowercase
+    
+    return ''.join(random.choice(letters) for i in range(length))
 
 #setup the encrpytion - ripped from stack overflow lol
-key=b'aCkApqJJoVHfoj79F8h0367griF43gv9aYftgxdfo-E='
+f = open('key.env')
+key = f.read()
+f.close()
 cipher_suite = Fernet(key) #setting up the cipher with the key
 encoded_text = cipher_suite.encrypt(b"Hello stackoverflow!") #Used to encrpyt text
 decoded_text = cipher_suite.decrypt(encoded_text) #Used to decrypt 
@@ -139,7 +149,6 @@ def add_message(username, message, date):
     message = str.encode(message);username = str.encode(username)
     message = cipher_suite.encrypt(message)
     username = cipher_suite.encrypt(username)
-    print(date)
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
     cursor.execute("INSERT INTO messages (username, message, date) VALUES (?, ?, ?)", (username, message, date))
@@ -241,6 +250,22 @@ def handleCommands(input, args=None, username=None):
                 messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
                 <span style="color: rgb(198, 201, 204);"> Sorry I don't believe that is a command, perhaps check your spelling? </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
+
+#Handle user image upload
+@socketio.on('imageUpload')
+def handle_user_upload(imageData):
+    imageDataU = imageData[0][len("data:image/png;base64,"):]
+    #I guess png only for now
+    image = base64.b64decode(imageDataU)
+    username=imageData[1]
+    randomImageName = get_random_string(40)
+    date = epoch_to_dd_mm_yyyy()
+    f = open(f"static/usersUploaded/{randomImageName}.png", "wb")
+    f.write(image)
+    f.close()
+    message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username} style="width=80%; height=80%"/>'
+    add_message(username, message, date)
+    send({'username': username, 'message': message, 'date': date}, broadcast=True)
 
 @socketio.on('message')
 def handle_message(message_data):
