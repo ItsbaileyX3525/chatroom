@@ -212,7 +212,7 @@ align-items: center;
     </div>
     <div class="form__group field" autocomplete="off">
       <div class="message-input-container" autocomplete="off">
-        <label><img id="uploadButton" style="width:50px;height:50px" src="https://i.ibb.co/wSj1wZV/upload.png"></img></label><input type='file' style="visibility: hidden ; display: none;" id="uploadImage" onchange="handleUpload();" ></input>
+        <label><img id="uploadButton" style="width:50px;height:50px" src="https://i.ibb.co/wSj1wZV/upload.png"></img></label><input type='file' style="visibility: hidden ; display: none;" id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();" ></input>
           <input type="input" class="form__field" placeholder="Message" id="name" required maxlength="800" autocomplete="off">
           <button id="sendButton" class="send-button">&#10148;</button>
         </div>
@@ -311,11 +311,19 @@ addEventListener("DOMContentLoaded", (event) => {
 function handleUpload() {
     const input = document.getElementById('uploadImage');
       if (input.files && input.files[0]) {
+        var imageType
+        if (input.files[0].name.endsWith(".png")){
+          imageType = 'png'
+        }else if (input.files[0].name.endsWith(".jpg") || input.files[0].name.endsWith(".jpeg")){
+          imageType = 'jpg'
+        } else if (input.files[0].name.endsWith(".webp")){ 
+          imageType = 'webp'
+        }
         const reader = new FileReader();
 
         reader.onload = function (e) {
             const base64Image = e.target.result;
-            socket.emit("imageUpload", [base64Image, setUsername])
+            socket.emit("imageUpload", [base64Image, imageType, setUsername])
         };
 
         reader.readAsDataURL(input.files[0]);
@@ -347,9 +355,21 @@ customAudios = {
 }
 
 
-function playAudio(type){
-  customAudios[type].play()
+function playAudio(type,url=""){
+  if (type != "custom"){
+  customAudios[type].play()}
+  else {
+    console.log(url)
+    new Audio(url).play()
+  }
 }
+socket.on('userToBan', function(data){
+  console.log(data)
+  if (data == setUsername){
+    socket.emit("handleIP")
+  }
+  
+})
     </script>
 </body>
 </html>

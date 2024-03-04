@@ -175,8 +175,15 @@ def index():
                 newMessageList.append((Dusername, Dmessage, Ddate))
             else:
                 print(messages)
-                    
-    return render_template("index.html", messages=newMessageList)
+
+    f = open('blacklist.db')
+    ipBlacklist = f.read().splitlines()
+    ip_address = request.remote_addr
+    f.close()
+    if ip_address in ipBlacklist:
+        return render_template("UhOhYoureBanned.html")
+    else:
+        return render_template("index.html", messages=newMessageList)
 
 @socketio.on('AdminMessage')
 def handle_admin_message(message_data):
@@ -206,7 +213,7 @@ sounds={
     "gay":'"gay"'
 }
 
-def handleCommands(input, args=None, username=None):
+def handleCommands(input, args=None, username=None, fullInput=None):
     if input == '/help':
         try:
             args = args.strip()
@@ -256,6 +263,10 @@ def handleCommands(input, args=None, username=None):
     elif input == '/play':
         if args in sounds:
             send_js(f"""playAudio({sounds[args]})""")
+        else:
+            if re.match(r'(https?://.*\.(?:mp3|ogg))', args):#
+                send_js(f'''playAudio('custom', "{args}")''')
+
     elif input == '/playList':
         send_js('''const chatBox = document.getElementById("chat-box");
                 const messageElement = document.createElement("p");
@@ -271,6 +282,11 @@ def handleCommands(input, args=None, username=None):
                 messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
                 <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/ban':
+        words = fullInput[1].split()
+        fullInput.remove(fullInput[1])
+        fullInput.extend(words)
+        emit('userToBan', fullInput[2])
     else:
         send_js('''const chatBox = document.getElementById("chat-box");
                 const messageElement = document.createElement("p");
@@ -278,19 +294,59 @@ def handleCommands(input, args=None, username=None):
                 <span style="color: rgb(198, 201, 204);"> Sorry I don't believe that is a command, perhaps check your spelling? </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
 
+#Ban a user
+@socketio.on('handleIP')
+def handleIP():
+    ip = request.remote_addr
+    with open("blacklist.db", 'w') as f:
+        f.write(f"\n{ip}")
+        f.close()
+    send_js(f'''location.reload();''', sid=request.sid)
+
 #Handle user image upload
 @socketio.on('imageUpload')
 def handle_user_upload(imageData):
-    imageDataU = imageData[0][len("data:image/png;base64,"):]
-    #I guess png only for now
-    image = base64.b64decode(imageDataU)
-    username=imageData[1]
-    randomImageName = get_random_string(40)
+    imageType = imageData[1]
+    username = imageData[2]
     date = epoch_to_dd_mm_yyyy()
-    f = open(f"static/usersUploaded/{randomImageName}.png", "wb")
-    f.write(image)
-    f.close()
-    message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username} style="width=80%; height=80%"/>'
+    randomImageName = get_random_string(40)
+
+    if imageType == 'png':
+        imageDataU = imageData[0][len("data:image/png;base64,"):]
+        image = base64.b64decode(imageDataU)
+        f = open(f"static/usersUploaded/{randomImageName}.png", "wb")
+        f.write(image)
+        f.close()
+
+        message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username} style="width=80%; height=80%"/>'
+
+    elif imageType == 'jpg':
+        imageDataU = imageData[0][len("data:image/jpg;base64,"):]
+        image = base64.b64decode(imageDataU)
+        f = open(f"static/usersUploaded/{randomImageName}.jpg", "wb")
+        f.write(image)
+        f.close()
+
+        message = f'<img src="../static/usersUploaded/{randomImageName}.jpg" alt="{username} style="width=80%; height=80%"/>'
+
+    elif imageType == 'jpeg':
+        imageDataU = imageData[0][len("data:image/jpg;base64,"):]
+        image = base64.b64decode(imageDataU)
+        f = open(f"static/usersUploaded/{randomImageName}.jpeg", "wb")
+        f.write(image)
+        f.close()
+
+        message = f'<img src="../static/usersUploaded/{randomImageName}.jpeg" alt="{username} style="width=80%; height=80%"/>'
+
+    elif imageType == 'webp':
+        imageDataU = imageData[0][len("data:image/webp;base64,"):]
+        image = base64.b64decode(imageDataU)
+        f = open(f"static/usersUploaded/{randomImageName}.webp", "wb")
+        f.write(image)
+        f.close()
+
+        message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username} style="width=80%; height=80%"/>'
+    
     add_message(username, message, date)
     send({'username': username, 'message': message, 'date': date}, broadcast=True)
 
@@ -315,9 +371,9 @@ def handle_message(message_data):
                 chatBox.appendChild(messageElement);''', sid=request.sid)
         else:
             try:
-                handleCommands(parts[0],parts[1],username)
+                handleCommands(parts[0],parts[1],username, parts)
             except:
-                handleCommands(parts[0])
+                handleCommands(parts[0], parts)
     else:
         if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
             # If it's an image URL, render it as an image
