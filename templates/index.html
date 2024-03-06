@@ -221,7 +221,7 @@ align-items: center;
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script>
-        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        const socket = io.connect('https://' + document.domain);
         socket.on('message', function(data) {
             const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");

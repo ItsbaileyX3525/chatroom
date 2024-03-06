@@ -6,6 +6,9 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="static/style.css">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta property="og:title" content="Bailey's chatroom">
+    <meta property="og:description" content="Welcome to the login page of Bailey's wonderful chatroom! We hope you enjoy your stay.">
+    <meta property="og:image" content="https://i.ibb.co/yBfsBZJ/image.png">
     <title>New login page IG</title>
 </head>
 <body>
@@ -24,6 +27,10 @@
                 <span>Sign up here</span>
                 <input type="text" placeholder="Username" id="regUsername" required>
                 <input type="password" placeholder="Password" id="regPassword" required>
+                <input type="checkbox" id="agreement1" name="agreement1" value="Yes" required>
+                <label for="agreement1" style="color:pink;"> I have read and agree to the <a href="../PrivacyPolicy">Privacy Policy</a></label>
+                <input type="checkbox" id="agreement2" name="agreement2" value="Yes" required>
+                <label for="agreement2" style="font-size:15px; color:pink;"> I agree that I am 13 or older.</label>
                 <button>Sign Up</button>
             </form>
         </div>
@@ -41,10 +48,6 @@
                 <span>Login here</span>
                 <input type="text" placeholder="Username" id="loginUsername" required>
                 <input type="password" placeholder="Password" id="loginPassword" required>
-                <input type="checkbox" id="agreement1" name="agreement1" value="Yes" required>
-                <label for="agreement1" style="color:pink;"> I have read and agree to the <a href="../PrivacyPolicy">Privacy Policy</a></label>
-                <input type="checkbox" id="agreement2" name="agreement2" value="Yes" required>
-                <label for="agreement2" style="font-size:15px; color:pink;"> I agree that I am 13 or older.</label>
                 <a href="#">Forgot Your Password?</a>
                 <button>Sign In</button>
             </form>

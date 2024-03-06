@@ -2,3 +2,5 @@
 *.db
 *.env
 static/usersUploaded/*
+*.pem
+*.key

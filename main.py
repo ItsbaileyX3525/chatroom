@@ -471,4 +471,5 @@ def login(data):
 
 if __name__ == "__main__":
     init_db()
-    socketio.run(app, debug=True, host='0.0.0.0',port=5000)
+    context = ('local.pem', 'local.key')
+    socketio.run(app, debug=True, host='0.0.0.0',port=443, ssl_context=context)
