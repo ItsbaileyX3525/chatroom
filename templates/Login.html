@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="../static/style.css">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <meta property="og:title" content="Bailey's chatroom">
     <meta property="og:description" content="Welcome to the login page of Bailey's wonderful chatroom! We hope you enjoy your stay.">
@@ -17,14 +17,8 @@
         <div class="form-container sign-up">
             <form id="registrationForm">
                 <h1>Create Account</h1>
-                <div class="social-icons">
-                    <a href="https://www.youtube.com/@ItsbaileyX3525" target="_blank" class="icon"><i class='bx bxl-youtube' ></i></i></a>
-                    <a href="https://github.com/ItsbaileyX3525" target="_blank" class="icon"><i class='bx bxl-github'></i></a>
-                    <a href="https://discord.gg/BPBrF37dBY" target="_blank" class="icon"><i class='bx bxl-discord-alt'></i></a>
-                    <a href="mailto:baileyleah542@gmail.com" target="_blank" class="icon"><i class='bx bxs-envelope'></i></a>
-                </div>
+
                 <div id="messageReg" style="color: red; transform: translateY(-8px);"></div>
-                <span>Sign up here</span>
                 <input type="text" placeholder="Username" id="regUsername" required>
                 <input type="password" placeholder="Password" id="regPassword" required>
                 <input type="checkbox" id="agreement1" name="agreement1" value="Yes" required>
@@ -32,24 +26,30 @@
                 <input type="checkbox" id="agreement2" name="agreement2" value="Yes" required>
                 <label for="agreement2" style="font-size:15px; color:pink;"> I agree that I am 13 or older.</label>
                 <button>Sign Up</button>
-            </form>
-        </div>
-        <div class="form-container sign-in">
-            <form id="loginForm">
-                <h1>Sign In</h1>
-                
                 <div class="social-icons">
                     <a href="https://www.youtube.com/@ItsbaileyX3525" target="_blank" class="icon"><i class='bx bxl-youtube' ></i></i></a>
                     <a href="https://github.com/ItsbaileyX3525" target="_blank" class="icon"><i class='bx bxl-github'></i></a>
                     <a href="https://discord.gg/BPBrF37dBY" target="_blank" class="icon"><i class='bx bxl-discord-alt'></i></a>
                     <a href="mailto:baileyleah542@gmail.com" target="_blank" class="icon"><i class='bx bxs-envelope'></i></a>
                 </div>
+            </form>
+        </div>
+        <div class="form-container sign-in">
+            <form id="loginForm">
+                <h1>Sign In</h1>
+                
                 <div id="messageLog" style="color: red; transform: translateY(-8px);"></div>
-                <span>Login here</span>
                 <input type="text" placeholder="Username" id="loginUsername" required>
                 <input type="password" placeholder="Password" id="loginPassword" required>
                 <a href="#">Forgot Your Password?</a>
                 <button>Sign In</button>
+                <div class="social-icons">
+                    <span style="align-items:center">My socials<br></span>
+                    <a href="https://www.youtube.com/@ItsbaileyX3525" target="_blank" class="icon"><i class='bx bxl-youtube' ></i></i></a>
+                    <a href="https://github.com/ItsbaileyX3525" target="_blank" class="icon"><i class='bx bxl-github'></i></a>
+                    <a href="https://discord.gg/BPBrF37dBY" target="_blank" class="icon"><i class='bx bxl-discord-alt'></i></a>
+                    <a href="mailto:baileyleah542@gmail.com" target="_blank" class="icon"><i class='bx bxs-envelope'></i></a>
+                </div>
             </form>
         </div>
         <div class="toggle-container">
@@ -69,6 +69,6 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
 
-    <script src="static/script.js"></script>
+    <script src="../static/script.js"></script>
 </body>
 </html>
