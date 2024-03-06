@@ -393,9 +393,24 @@ def handle_message(message_data):
 
 
 #Login
+            
+def user_on_mobile() -> bool:
+
+    user_agent = request.headers.get("User-Agent")
+    user_agent = user_agent.lower()
+    phones = ["android", "iphone"]
+
+    if any(x in user_agent for x in phones):
+        return True
+    return False
+
 @app.route("/Login")
 def Login():
-    return render_template("Login.html")
+    if user_on_mobile():
+        return render_template("LoginMobile.html")
+    else:
+        return render_template("Login.html")
+
 
 @app.route("/PrivacyPolicy")
 def PrivacyPolicy():
@@ -416,6 +431,7 @@ create_table_accounts ()
 
 @socketio.on('OnConnect')
 def connected(username):
+    print(username)
     send_js(f'''showNotification("{username} has conncted!")''')
 
 @socketio.on('register')
@@ -472,4 +488,4 @@ def login(data):
 if __name__ == "__main__":
     init_db()
     context = ('local.pem', 'local.key')
-    socketio.run(app, debug=True, host='0.0.0.0',port=443, ssl_context=context)
+    socketio.run(app, debug=True, host='0.0.0.0',port=2096, ssl_context=context)
