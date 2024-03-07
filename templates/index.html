@@ -17,6 +17,7 @@ font-family: 'MyCustomFont'
   border: 1px solid #ccc;
   width:400px;
   padding: 10px;
+  background-color: #424141;
 }
 
 @media screen and (max-width: 1199px) {
@@ -33,7 +34,7 @@ font-family: 'MyCustomFont'
     width: 80%; /* Adjust the width for larger screens (e.g., tablets and desktops) */
     max-width: 1200px; /* Set a maximum width for larger screens */
     height: 600px;
-    margin: 0 auto; /* Center the chat box horizontally */
+    margin: 0 auto;
   }
 }
 :root {
@@ -148,30 +149,22 @@ align-items: center;
             left: 0;
             width: 100%;
         }
-        .button-9 {
+.button-9 {
   appearance: button;
-  backface-visibility: hidden;
   background-color: #405cf5;
   border-radius: 6px;
-  border-width: 0;
   box-sizing: border-box;
   cursor: pointer;
   font-family: -apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif;
   font-size: 100%;
   height: 44px;
   line-height: 1.15;
-  margin: 12px 0 0;
   overflow: hidden;
   padding: 0 25px;
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 0px;
+  right: 0px;
   text-align: center;
-  text-transform: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  width: 8%;
 
   border: 0 solid;
   box-shadow: inset 0 0 20px rgba(255, 255, 255, 0);
@@ -200,7 +193,6 @@ align-items: center;
 </head>
 <body>
   <div id="notification">This is a custom notification!</div>
-    <h1 class="rainbowText">Bailey's chatroom</h1>
     <button class="button-9" role="button" onclick="Logout()">Logout</button>
     <div id="chat-box">
       {% for message in messages %}
@@ -222,8 +214,8 @@ align-items: center;
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script>
         const socket = io.connect('https://' + document.domain);
+        const chatBox = document.getElementById("chat-box");
         socket.on('message', function(data) {
-            const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
             messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">${data.username}:</strong> <span style="color: rgb(198, 201, 204);">${data.message}</span><span style="color: rgb(198, 201, 204);translate:transformY(20px); font-size: 12px;opacity:.2">${data.date}</span>`;
             chatBox.appendChild(messageElement);
@@ -238,6 +230,8 @@ align-items: center;
         const setUsername = localStorage.getItem("username");
         const loggedin = localStorage.getItem('LoggedIn');
         
+        chatBox.scrollTop = chatBox.scrollHeight;
+
         if (!setUsername || !loggedin){
           window.location.href = '../Login';
         }
@@ -291,7 +285,6 @@ socket.on('execute_js', function(jsCode) {
                 console.error('JavaScript evaluation error:', error);
             }
         });
-        const chatBox = document.getElementById("chat-box");const messageElement = document.createElement("p");messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong><span style="color: rgb(198, 201, 204);"> welcome ${setUsername}, use /help for a list of commands.</span>`;chatBox.appendChild(messageElement);
         function showNotification(message) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
