@@ -294,6 +294,7 @@ socket.on('execute_js', function(jsCode) {
                 notification.style.display = 'none';
             }, 3000);
         }
+        const messageElement = document.createElement("p");messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong><span style="color: rgb(198, 201, 204);"> welcome ${setUsername}, use /help for a list of commands.</span>`;chatBox.appendChild(messageElement);
         showNotification('Welcome!');
 function Logout(){
   localStorage.clear()
