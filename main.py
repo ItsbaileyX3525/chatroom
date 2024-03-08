@@ -174,6 +174,21 @@ def handle_admin_message(message_data):
     else:
         send({'username': "Admin", 'message': message_data['message'], 'date': date}, broadcast=True)
 
+def banUser(username):
+    #Used for banning users to prevent VPN usage
+
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
+    result = cursor.fetchone()
+
+    if result:
+        uuid = result[0]
+        print("UUID for username", username, "is:", uuid)
+    else:
+        print("No user found with the username", username)
+
+
 sounds={
     "hellNaw":'"hellNaw"',
     "clang":'"clang"',
@@ -190,18 +205,16 @@ fonts={
     "SourceCodePro":"'Custom4'",
     "ComicSans":"'Custom2'"
 }
-def handleCommands(input, args=None, username=None, fullInput=None):
+def handleCommands(args):
+    input = args[0]
+    print(len(args))
     if input == '/help':
-        try:
-            args = args.strip()
-            if args == '':
-                args = None
-        except:
-            pass
+        if len(args) == 1:
+            args = None
         send_js(f'''const chatBox = document.getElementById("chat-box");
                     const messageElement = document.createElement("p");
                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList, /play, /playList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (NewPassword)" if args == "changePwd" or args=='/changePwd' else 'Syntax is /play (soundName), example /play hellNaw' if args=='/play' or args=='play' else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} </span>`;
+                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList, /play, /playList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (NewPassword)" if args[1] == "changePwd" or args[1]=='/changePwd' else 'Syntax is /play (soundName), example /play hellNaw' if args[1]=='/play' or args[1]=='play' else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} </span>`;
                     chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/emojis':
         send_js('''const chatBox = document.getElementById("chat-box");
@@ -222,7 +235,7 @@ def handleCommands(input, args=None, username=None, fullInput=None):
                      <span style="color: rgb(198, 201, 204);"> Enjoy :)\nJk lol I'm not going to flood you with 900 lines of emojis but you can view the emoji list from <a target="_blank" href="https://pastebin.com/1b0QnGxg">here</a></span>`;
                      chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/changePwd':
-        success = change_password(username, args)
+        success = change_password(args[1], args[2])
         send_js(f'''const chatBox = document.getElementById("chat-box");
                      const messageElement = document.createElement("p");
                      messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
@@ -238,8 +251,8 @@ def handleCommands(input, args=None, username=None, fullInput=None):
                 <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == "/font":
-        if args in fonts:
-            send_js(f"""changeFont({fonts[args]});localStorage.setItem('font', {fonts[args]});""", sid=request.sid)
+        if args[1] in fonts:
+            send_js(f"""changeFont({fonts[args[1]]});localStorage.setItem('font', {fonts[args[1]]});""", sid=request.sid)
 
     elif input == '/playList':
         send_js('''const chatBox = document.getElementById("chat-box");
@@ -249,11 +262,11 @@ def handleCommands(input, args=None, username=None, fullInput=None):
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     
     elif input == '/play':
-        if args in sounds:
-            send_js(f"""playAudio({sounds[args]})""")
+        if args[1] in sounds:
+            send_js(f"""playAudio({sounds[args[1]]})""")
         else:
-            if re.match(r'(https?://.*\.(?:mp3|ogg))', args):#
-                send_js(f'''playAudio('custom', "{args}")''')
+            if re.match(r'(https?://.*\.(?:mp3|ogg))', args[1]):#
+                send_js(f'''playAudio('custom', "{args[1]}")''')
 
     elif input == '/playList':
         send_js('''const chatBox = document.getElementById("chat-box");
@@ -262,7 +275,7 @@ def handleCommands(input, args=None, username=None, fullInput=None):
                 <span style="color: rgb(198, 201, 204);"> Current list of sounds are: 'hellNaw', 'clang', 'gay', 'pluh', 'whatDaDogDoin', 'boom' and 'mew'. </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/destroyAll':
-        if args == "AdminKey":
+        if args[1] == "AdminKey":
             wipeEverything()
         else:
             send_js('''const chatBox = document.getElementById("chat-box");
@@ -271,10 +284,9 @@ def handleCommands(input, args=None, username=None, fullInput=None):
                 <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/ban':
-        words = fullInput[1].split()
-        fullInput.remove(fullInput[1])
-        fullInput.extend(words)
-        emit('userToBan', fullInput[2])
+        if args[1] == 'AdminKey':
+            banUser()
+            emit('userToBan', args[2])
     else:
         send_js('''const chatBox = document.getElementById("chat-box");
                 const messageElement = document.createElement("p");
@@ -343,43 +355,55 @@ def handle_message(message_data):
     username = message_data['username']
     lowerUser = username.lower()
     message = message_data['message']
+    UUID = message_data['UUID']
     date = epoch_to_dd_mm_yyyy()
     trimmedMessage = message.split()
 
-    if lowerUser in hardBannedNames:
-        send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
-    elif trimmedMessage[0].startswith("/"):
-        parts = message.split(" ", 1)
-        print(parts)
-        if len(parts) > 2:
-            send_js('''const chatBox = document.getElementById("chat-box");
-                const messageElement = document.createElement("p");
-                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Error: Password cannot contain spaces. </span>`;
-                chatBox.appendChild(messageElement);''', sid=request.sid)
+    #Validating UUID because someone could fake their username
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
+    result = cursor.fetchone()
+
+    if result:
+        uuid = result[0]
+
+        if UUID == uuid:
+
+            if lowerUser in hardBannedNames:
+                send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
+            elif trimmedMessage[0].startswith("/"):
+                message = message.split()
+                handleCommands(message)
+
+            else:
+                if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
+                    # If it's an image URL, render it as an image
+                    message = f'<img src="{message}" alt="{username} style="width=80%; height=80%"/>'
+                    send({'username': username, 'message': message, 'date': date}, broadcast=True)
+                    add_message(username, message, date)
+                elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
+                    #Same with a video URL
+                    message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
+                    send({'username': username, 'message': message, 'date': date}, broadcast=True)
+                else:
+                    escaped_message = html.escape(message)
+                    add_message(username, escaped_message, date)
+                    escaped_message = replace_colon_items(escaped_message)
+                    send({'username': username, 'message': escaped_message, 'date': date}, broadcast=True)
+                    send_js("""notifyUser()""")
         else:
-            try:
-                handleCommands(parts[0],parts[1],username, parts)
-            except:
-                handleCommands(parts[0], parts)
+                send_js('''const chatBox = document.getElementById("chat-box");
+                    const messageElement = document.createElement("p");
+                    messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                    <span style="color: rgb(198, 201, 204);"> Error: UUID mismatch. This is usually because you tried sending a custom message with a different username, if not please contact admin. </span>`;
+                    chatBox.appendChild(messageElement);''', sid=request.sid)
     else:
-        if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
-            # If it's an image URL, render it as an image
-            message = f'<img src="{message}" alt="{username} style="width=80%; height=80%"/>'
-            send({'username': username, 'message': message, 'date': date}, broadcast=True)
-            add_message(username, message, date)
-        elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
-            #Same with a video URL
-            message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
-            send({'username': username, 'message': message, 'date': date}, broadcast=True)
-        else:
-            escaped_message = html.escape(message)
-            add_message(username, escaped_message, date)
-            escaped_message = replace_colon_items(escaped_message)
-            send({'username': username, 'message': escaped_message, 'date': date}, broadcast=True)
-            send_js("""notifyUser()""")
-
-
+        send_js('''const chatBox = document.getElementById("chat-box");
+        const messageElement = document.createElement("p");
+        messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+        <span style="color: rgb(198, 201, 204);"> Error: No UUID matched with provided username, perhaps user doesn't exist? </span>`;
+        chatBox.appendChild(messageElement);''', sid=request.sid)  
 
 def user_on_mobile() -> bool:
 
@@ -442,7 +466,8 @@ def create_table_accounts():
                       (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                       username TEXT NOT NULL UNIQUE, 
                       password TEXT NOT NULL,
-                      agreement TEXT NOT NULL)''')
+                      agreement TEXT NOT NULL,
+                      UUID TEXT NOT NULL)''')
     conn.commit()
     conn.close()
 
@@ -458,7 +483,7 @@ def register(data):
     username = data['username']
     password = data['password']
     agreement = data['agreed']
-    print(agreement)
+    UUID = data['UUID']
     Dusername = username.lower()
     Dusername = Dusername.strip()
     Dpassword = bool(re.search(r"\s", password))
@@ -480,11 +505,11 @@ def register(data):
         else:
             # Hashing password
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            cursor.execute("INSERT INTO users (username, password, agreement) VALUES (?, ?, ?)", (username, hashed_password, agreement))
+            cursor.execute("INSERT INTO users (username, password, agreement, UUID) VALUES (?, ?, ?, ?)", (username, hashed_password, agreement, UUID))
             conn.commit()
             conn.close()
             emit('registration_response', {'message': 'Registration successful', 'colour': 'green'})
-            send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
+            send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
 
 @socketio.on('login')
 def login(data):
@@ -512,4 +537,4 @@ def login(data):
 if __name__ == "__main__":
     init_db()
     context = ('local.pem', 'local.key')
-    socketio.run(app, debug=True, host='0.0.0.0',port=2096, ssl_context=context)
+    socketio.run(app, debug=True, host='0.0.0.0',port=443, ssl_context=context)

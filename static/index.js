@@ -3,7 +3,7 @@ userFont = localStorage.getItem('font') || 'Normal'
 document.body.style.fontFamily = userFont
 
 //Server stuff (on server)
-const socket = io.connect('https://' + document.domain + ":2096");
+const socket = io.connect('https://' + document.domain + ":443");
 const chatBox = document.getElementById("chat-box");
 socket.on('message', function(data) {
     const messageElement = document.createElement("p");
@@ -32,10 +32,6 @@ messageInput.addEventListener("keydown", function(event) {
         var username = setUsername;
         const message = messageInput.value;
         username = username.trim()
-        if (message && username === 'Admin'){
-            var resp = window.prompt("Enter key...")
-            socket.emit('AdminMessage', {'message': message, 'key' : resp});
-    }
     if (message && ! username){
         alert("You need a username.")
     } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
@@ -53,10 +49,7 @@ sendbutton.addEventListener('click', function(event) {
     var username = setUsername;
     const message = messageInput.value;
     username = username.trim()
-    if (message && username === 'Admin'){
-        var resp = window.prompt("Enter key...")
-        socket.emit('AdminMessage', {'message': message, 'key' : resp});
-    }
+
     if (message && ! username){
         alert("You need a username.")
     } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
