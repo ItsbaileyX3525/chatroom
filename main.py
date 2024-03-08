@@ -290,7 +290,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username} style="width=80%; height=80%"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
 
     elif imageType == 'jpg':
         imageDataU = imageData[0][len("data:image/jpg;base64,"):]
@@ -299,7 +299,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.jpg" alt="{username} style="width=80%; height=80%"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.jpg" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
 
     elif imageType == 'jpeg':
         imageDataU = imageData[0][len("data:image/jpg;base64,"):]
@@ -308,7 +308,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.jpeg" alt="{username} style="width=80%; height=80%"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.jpeg" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
 
     elif imageType == 'webp':
         imageDataU = imageData[0][len("data:image/webp;base64,"):]
@@ -317,7 +317,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username} style="width=80%; height=80%"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
     
     add_message(username, message, date)
     send({'username': username, 'message': message, 'date': date}, broadcast=True)
