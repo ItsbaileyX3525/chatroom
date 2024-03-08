@@ -476,7 +476,7 @@ create_table_accounts ()
 @socketio.on('OnConnect')
 def connected(username):
     print(username)
-    send_js(f'''showNotification("{username} has conncted!")''')
+    send_js(f'''showNotification("{username} has connected!")''')
 
 @socketio.on('register')
 def register(data):
