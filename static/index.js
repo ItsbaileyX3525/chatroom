@@ -1,3 +1,8 @@
+//Webpage stuff (not on server)
+userFont = localStorage.getItem('font') || 'Normal'
+document.body.style.fontFamily = userFont
+
+//Server stuff (on server)
 const socket = io.connect('https://' + document.domain + ":2096");
 const chatBox = document.getElementById("chat-box");
 socket.on('message', function(data) {
@@ -109,10 +114,6 @@ if (input.files && input.files[0]) {
         console.error('No image selected.');
     }
 }
-const uploadButton = document.getElementById("uploadButton")
-uploadButton.addEventListener('click',function(e){
-    document.getElementById('uploadImage').click()
-})
 discordNotifaction = new Audio('static/noti.ogg')
 function notifyUser(){
     if (!document.hasFocus()) {
@@ -139,7 +140,11 @@ function playAudio(type,url=""){
         new Audio(url).play()
     }
 }
-
+function changeFont(type,url){
+    if (type !="custom"){
+        document.body.style.fontFamily = type
+    }
+}
 socket.on('userToBan', function(data){
     if (data == setUsername){
         socket.emit("handleIP")

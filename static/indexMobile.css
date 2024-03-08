@@ -1,14 +1,31 @@
 @font-face {
-    font-family: 'MyCustomFont';
-    src: url("{{ url_for('static', filename='font.ttf') }}") format('truetype');
-    }
-    
-    .custom-font {
-    font-family: 'MyCustomFont'
-    }
-    
+  font-family: 'Custom1';
+  src: url('../static/Helvetica.ttf') format('truetype');
+  /* Add other font properties here if needed */
+}
+@font-face {
+  font-family: 'Custom2';
+  src: url('../static/ComicSans.ttf') format('truetype');
+  /* Add other font properties here if needed */
+}
+@font-face {
+  font-family: 'Custom3';
+  src: url('../static/RobotMono.ttf') format('truetype');
+  /* Add other font properties here if needed */
+}
+@font-face {
+  font-family: 'Custom4';
+  src: url('../static/SourceCodePro.ttf') format('truetype');
+  /* Add other font properties here if needed */
+}
+@font-face {
+  font-family: 'Normal';
+  src: url('../static/font.ttf') format('truetype');
+  /* Add other font properties here if needed */
+}
+   
 body {
-    font-family: 'MyCustomFont';
+    font-family: 'Normal';
     display: flex;
     flex-direction: column;
     justify-content: center;

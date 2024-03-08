@@ -61,7 +61,6 @@ def replace_colon_items(input_string, data_list=data_list):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
-#sslify = SSLify(app)
 
 hardBannedNames = ['System', 'system']
 
@@ -184,7 +183,13 @@ sounds={
     "pluh":'"pluh"',
     "gay":'"gay"'
 }
-
+fonts={
+    "Helvetica":"'Custom1'",
+    "Normal":"'Normal'",
+    "RobotoMono":"'Custom3'",
+    "SourceCodePro":"'Custom4'",
+    "ComicSans":"'Custom2'"
+}
 def handleCommands(input, args=None, username=None, fullInput=None):
     if input == '/help':
         try:
@@ -232,6 +237,17 @@ def handleCommands(input, args=None, username=None, fullInput=None):
                 messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
                 <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key </span>`;
                 chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == "/font":
+        if args in fonts:
+            send_js(f"""changeFont({fonts[args]});localStorage.setItem('font', {fonts[args]});""", sid=request.sid)
+
+    elif input == '/playList':
+        send_js('''const chatBox = document.getElementById("chat-box");
+                const messageElement = document.createElement("p");
+                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
+                <span style="color: rgb(198, 201, 204);"> Current list of fonts are: 'Helvetica', 'RobotoMono', 'SourceCodePro', 'Normal' and 'ComicSans'. </span>`;
+                chatBox.appendChild(messageElement);''', sid=request.sid)
+    
     elif input == '/play':
         if args in sounds:
             send_js(f"""playAudio({sounds[args]})""")
