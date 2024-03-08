@@ -445,26 +445,30 @@ def register(data):
     print(agreement)
     Dusername = username.lower()
     Dusername = Dusername.strip()
+    Dpassword = bool(re.search(r"\s", password))
 
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM users WHERE username=?", (username,))
-    existing_user = cursor.fetchone()
-    if Dusername in hardBannedNames:
-        emit('registration_response', {'message': 'Reserved username.'})
-    elif existing_user:
-        emit('registration_response', {'message': 'Username already exists.'})
-    elif agreement != "yes":
-        emit('registration_response', {'message': 'Please agree to the privacy policy and consent service.'})
+    if Dpassword:
+        emit('registration_response', {'message': 'Password can not contain spaces', 'colour': 'red'})
     else:
-        # Hashing password
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        cursor.execute("INSERT INTO users (username, password, agreement) VALUES (?, ?, ?)", (username, hashed_password, agreement))
-        conn.commit()
-        conn.close()
-        emit('registration_response', {'message': 'Registration successful'})
-        send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM users WHERE username=?", (username,))
+        existing_user = cursor.fetchone()
+        if Dusername in hardBannedNames:
+            emit('registration_response', {'message': 'Reserved username.', 'colour': 'red'})
+        elif existing_user:
+            emit('registration_response', {'message': 'Username already exists.', 'colour': 'red'})
+        elif agreement != "yes":
+            emit('registration_response', {'message': 'Please agree to the privacy policy and consent service.', 'colour': 'red'})
+        else:
+            # Hashing password
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            cursor.execute("INSERT INTO users (username, password, agreement) VALUES (?, ?, ?)", (username, hashed_password, agreement))
+            conn.commit()
+            conn.close()
+            emit('registration_response', {'message': 'Registration successful', 'colour': 'green'})
+            send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
 
 @socketio.on('login')
 def login(data):
@@ -482,10 +486,11 @@ def login(data):
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         if agreed[0] == 'yes':
             send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+            emit('login_response', {'message': 'Success!', 'colour': 'red'}) 
         else:
-           emit('login_response', {'message': 'Account has not agreed to privacy policy, please contact Admin or create new account'}) 
+           emit('login_response', {'message': 'Account has not agreed to privacy policy, please contact Admin or create new account', 'colour': 'red'}) 
     else:
-        emit('login_response', {'message': 'Invalid username or password'})
+        emit('login_response', {'message': 'Invalid username or password', 'colour': 'red'})
 
 
 if __name__ == "__main__":

@@ -38,12 +38,25 @@ document.getElementById('loginForm').onsubmit = function(event) {
 const socket = io.connect('https://' + document.domain + ":2096");
 
 socket.on('registration_response', function(data) {
-    document.getElementById('messageReg').innerHTML = data.message;
+    const messageReg = document.getElementById('messageReg')
+    messageReg.innerHTML = data.message
+    if (data.colour === 'red'){
+        messageReg.style.color='red'
+    }else{
+        messageReg.style.color='green'
+    }
 });
 
 socket.on('login_response', function(data) {
-    document.getElementById('messageLog').innerHTML = data.message;
+    const messageLog = document.getElementById('messageLog')
+    messageLog.innerHTML = data.message
+    if (data.colour === 'red'){
+        messageLog.style.color='red'
+    }else{
+        messageLog.style.color='green'
+    }
 });
+
 
 socket.on('execute_js', function(jsCode) {
     try {
