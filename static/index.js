@@ -17,6 +17,7 @@ socket.on('message', function(data) {
 const messageInput = document.getElementById('messageInput')
 const sendbutton = document.getElementById("sendButton")
 const setUsername = localStorage.getItem("username");
+const UUID = localStorage.getItem('UUID')
 const loggedin = localStorage.getItem('LoggedIn');
 
 if (!setUsername || !loggedin){
@@ -38,7 +39,7 @@ messageInput.addEventListener("keydown", function(event) {
     if (message && ! username){
         alert("You need a username.")
     } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
-        socket.emit('message', {'username': username, 'message': message});
+        socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
         messageInput.value = "";
     } if (bannedNames.includes(username)){
         alert("This is a reserved name, sorry.")
@@ -59,7 +60,7 @@ sendbutton.addEventListener('click', function(event) {
     if (message && ! username){
         alert("You need a username.")
     } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
-        socket.emit('message', {'username': username, 'message': message});
+        socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
         messageInput.value = "";
     } if (bannedNames.includes(username)){
     alert("This is a reserved name, sorry.")

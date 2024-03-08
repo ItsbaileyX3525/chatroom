@@ -2,6 +2,10 @@ const container = document.getElementById('container');
 const registerBtn = document.getElementById('register');
 const loginBtn = document.getElementById('login');
 
+function uuidv4() {
+    return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+);}
 
 registerBtn.addEventListener('click', ()=>{
     container.classList.add('active');
@@ -15,7 +19,7 @@ document.getElementById('registrationForm').onsubmit = function(event) {
     event.preventDefault();
     var username = document.getElementById('regUsername').value;
     var password = document.getElementById('regPassword').value;
-    socket.emit('register', { username: username, password: password, agreed: "yes" });
+    socket.emit('register', { username: username, password: password, agreed: "yes", UUID: uuidv4() });
 
 }
 
