@@ -7,29 +7,30 @@
     <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="static/index.css">
+    
     <meta property="og:title" content="Bailey's chatroom">
     <meta property="og:description" content="Welcome to the chatroom of Bailey, talk discuss and do whatever!">
     <meta property="og:image" content="https://i.ibb.co/rpgNnkK/image.png">
 </head>
 <body>
   <div id="notification">This is a custom notification!</div>
-    <button class="button-9" role="button" onclick="Logout()">Logout</button><br><br>
+    <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
     <div id="chat-box">
       {% for message in messages %}
-      <p>
-          <strong style="color: rgb(198, 201, 204)">{{ message[0] }}:</strong>
-          <span style="color: rgb(198, 201, 204)">{{ message[1]|safe }}</span>
-          <span style="color: rgb(198, 201, 204);translate:transformY(20px); font-size: 12px;opacity:.2">{{message[2] }}</span>
+      <p class="chat-message">
+          <span class="date">{{message[2] }}</span>
+          <span class="username">{{ message[0] }}:</span>
+          <span class="message">{{ message[1]|safe }}</span>
       </p>
   {% endfor %}
     </div>
     <div class="container">
-      <div class="input-container">
-        <label for="uploadImage"><i id="uploadButton" class="fa-regular fa-file-image fa-2xl"></i></label>
-        <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" style="visibility: hidden; display: none;" onchange="handleUpload();"></input>
+      <div class="file-upload-container">
+        <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
+        <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();"></input>
       </div>
       <textarea id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>
-      <div class="button-container">
+      <div class="send-button-container">
         <button id="sendButton" class="send-button">&#10148;</button>
       </div>
     </div>

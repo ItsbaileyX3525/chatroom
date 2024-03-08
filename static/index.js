@@ -82,7 +82,9 @@ function Logout(){
 }
 addEventListener("DOMContentLoaded", (event) => {
     socket.emit('OnConnect', setUsername)
-    const messageElement = document.createElement("p");messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong><span style="color: rgb(198, 201, 204);"> welcome ${setUsername}, use /help for a list of commands.</span>`;chatBox.appendChild(messageElement);
+    const messageElement = document.createElement("p");
+    messageElement.classList.add("chat-message");
+    messageElement.innerHTML = `<span class="username system">System:</span><span class="message"> welcome ${setUsername}, use /help for a list of commands.</span>`;chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 function handleUpload() {
