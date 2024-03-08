@@ -157,34 +157,6 @@ def add_message(username, message, date):
     conn.commit()
     conn.close()
 
-@app.route("/")
-def index():
-    newMessageList = [] 
-    messages = get_messages()
-    if messages:
-        for message in messages:
-            if len(message) >= 3:
-                Dusername = message[0]
-                Dusername = cipher_suite.decrypt(Dusername)
-                Dusername = Dusername.decode()
-                Dmessage = message[1]
-                Dmessage = cipher_suite.decrypt(Dmessage)
-                Dmessage = Dmessage.decode()
-                Dmessage = replace_colon_items(Dmessage)
-                Ddate = message[2]
-                newMessageList.append((Dusername, Dmessage, Ddate))
-            else:
-                print(messages)
-
-    f = open('blacklist.db')
-    ipBlacklist = f.read().splitlines()
-    ip_address = request.remote_addr
-    f.close()
-    if ip_address in ipBlacklist:
-        return render_template("UhOhYoureBanned.html")
-    else:
-        return render_template("index.html", messages=newMessageList)
-
 @socketio.on('AdminMessage')
 def handle_admin_message(message_data):
     date = epoch_to_dd_mm_yyyy()
@@ -392,8 +364,7 @@ def handle_message(message_data):
             send_js("""notifyUser()""")
 
 
-#Login
-            
+
 def user_on_mobile() -> bool:
 
     user_agent = request.headers.get("User-Agent")
@@ -403,6 +374,38 @@ def user_on_mobile() -> bool:
     if any(x in user_agent for x in phones):
         return True
     return False
+
+@app.route("/")
+def index():
+    newMessageList = [] 
+    messages = get_messages()
+    if messages:
+        for message in messages:
+            if len(message) >= 3:
+                Dusername = message[0]
+                Dusername = cipher_suite.decrypt(Dusername)
+                Dusername = Dusername.decode()
+                Dmessage = message[1]
+                Dmessage = cipher_suite.decrypt(Dmessage)
+                Dmessage = Dmessage.decode()
+                Dmessage = replace_colon_items(Dmessage)
+                Ddate = message[2]
+                newMessageList.append((Dusername, Dmessage, Ddate))
+            else:
+                print(messages)
+
+    f = open('blacklist.db')
+    ipBlacklist = f.read().splitlines()
+    ip_address = request.remote_addr
+    f.close()
+    if ip_address in ipBlacklist:
+        return render_template("UhOhYoureBanned.html")
+    else:
+        if user_on_mobile():
+            return render_template("indexMobile.html", messages=newMessageList)
+        else:
+            return render_template("index.html", messages=newMessageList)
+
 
 @app.route("/Login")
 def Login():

@@ -1,6 +1,0 @@
-# Ignore SQLite database files
-*.db
-*.env
-static/usersUploaded/*
-*.pem
-*.key

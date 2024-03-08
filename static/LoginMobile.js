@@ -35,7 +35,7 @@ document.getElementById('loginForm').onsubmit = function(event) {
 
 };
 
-var socket = io.connect('https://' + document.domain);
+const socket = io.connect('https://' + document.domain + ":2096");
 
 socket.on('registration_response', function(data) {
     document.getElementById('messageReg').innerHTML = data.message;
