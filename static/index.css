@@ -97,6 +97,11 @@ Chat Box
     color: var(--important-color);
 }
 
+.chat-message .message img{
+    max-width: 100%;
+    max-height: 40vh;
+}
+
 /*
 Input 
 */

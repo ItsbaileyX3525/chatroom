@@ -5,11 +5,17 @@ import sqlite3
 from cryptography.fernet import Fernet
 import bcrypt
 import time
+import os
 import re
 import html
 import base64 
 import random
 import string
+
+#In case the folder doesnt exist otherwise 
+#image uploads dont wok
+if not os.path.isdir("static/usersUploaded"):
+    os.mkdir("static/usersUploaded")
 
 def get_random_string(length):
     letters = string.ascii_lowercase
@@ -60,7 +66,8 @@ def replace_colon_items(input_string, data_list=data_list):
 #define the application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+socketio = SocketIO(app, max_http_buffer_size=16 * 1024 * 1024)
 
 hardBannedNames = ['System', 'system']
 
@@ -120,7 +127,7 @@ def clear_messages():
     conn.commit()
     conn.close()
     send_js("""const chatBox = document.getElementById('chat-box');chatBox.innerHTML = ''""")
-    send({'username': 'System', 'message': 'Admin wiped the message database! (refresh to remove this message)', 'date': epoch_to_dd_mm_yyyy()}, broadcast=True)
+    send({'username': 'System', 'message': 'Admin wiped the message database! (refresh to remove this message)', 'date': epoch_to_dd_mm_yyyy(), 'isCustom': "no"}, broadcast=True)
 
 #Wipe all the databases (messasges and users)
 def wipeEverything():
@@ -156,24 +163,6 @@ def add_message(username, message, date):
     conn.commit()
     conn.close()
 
-@socketio.on('AdminMessage')
-def handle_admin_message(message_data):
-    date = epoch_to_dd_mm_yyyy()
-    if message_data['key'] == 'AdminKey':
-        message = message_data['message']
-        message = message.split()
-        if message_data['message'] == '/wipe':
-            clear_messages()
-        elif message[0] == '/change':
-            print("changed " + message[1], "'s password.")
-            username =message[1]
-            username.strip()
-            password =  message[2]
-            password.strip() 
-            change_password(username, new_password=password)
-    else:
-        send({'username': "Admin", 'message': message_data['message'], 'date': date}, broadcast=True)
-
 def banUser(username):
     #Used for banning users to prevent VPN usage
 
@@ -181,13 +170,10 @@ def banUser(username):
     cursor = conn.cursor()
     cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
     result = cursor.fetchone()
-
-    if result:
-        uuid = result[0]
-        print("UUID for username", username, "is:", uuid)
-    else:
-        print("No user found with the username", username)
-
+    print("The result", result[0])
+    f = open('blacklistUUID.db',"a")
+    f.write(result[0]+"\n")
+    f.close()
 
 sounds={
     "hellNaw":'"hellNaw"',
@@ -348,7 +334,7 @@ def handleCommands(args):
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/ban':
         if args[1] == 'AdminKey':
-            banUser()
+            banUser(args[2])
             emit('userToBan', args[2])
     else:
         send_js('''const chatBox = document.getElementById("chat-box");
@@ -368,7 +354,7 @@ def handleCommands(args):
 @socketio.on('handleIP')
 def handleIP():
     ip = request.remote_addr
-    with open("blacklist.db", 'w') as f:
+    with open("blacklist.db", 'a') as f:
         f.write(f"\n{ip}")
         f.close()
     send_js(f'''location.reload();''', sid=request.sid)
@@ -388,7 +374,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username}"/>'
 
     elif imageType == 'jpg':
         imageDataU = imageData[0][len("data:image/jpg;base64,"):]
@@ -397,7 +383,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.jpg" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.jpg" alt="{username}"/>'
 
     elif imageType == 'jpeg':
         imageDataU = imageData[0][len("data:image/jpg;base64,"):]
@@ -406,7 +392,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.jpeg" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.jpeg" alt="{username}"/>'
 
     elif imageType == 'webp':
         imageDataU = imageData[0][len("data:image/webp;base64,"):]
@@ -415,7 +401,7 @@ def handle_user_upload(imageData):
         f.write(image)
         f.close()
 
-        message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username} style="max-width: 35vh; max-height: 35vh"/>'
+        message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username}">'
     
     add_message(username, message, date)
     send({'username': username, 'message': message, 'date': date}, broadcast=True)
@@ -434,6 +420,27 @@ def handle_message(message_data):
     cursor = conn.cursor()
     cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
     result = cursor.fetchone()
+
+    #checking if user is banned
+    f = open('blacklistUUID.db')
+    Blacklist = f.read().splitlines()
+
+    if UUID in Blacklist:
+        send_js('''const chatBox = document.getElementById("chat-box");
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "You are banned ;P, and now we are going to reban this new IP ;) "
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
+        emit('userToBan', username)
+        
+        return
 
     if result:
         uuid = result[0]
@@ -472,7 +479,7 @@ def handle_message(message_data):
                     systemName.classList.add("username", "system");
                     systemName.innerHTML = "System: "
                     systemMessage.classList.add("message");
-                    systemMessage.innerHTML = "Your current UUID doesn't match with the username provided, perhaps you tried to use a custom name? If not please contact the admin."
+                    systemMessage.innerHTML = "Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not"
                     messageElement.appendChild(systemName);
                     messageElement.appendChild(systemMessage);
                     chatBox.appendChild(messageElement);''', sid=request.sid)
@@ -485,7 +492,7 @@ def handle_message(message_data):
             systemName.classList.add("username", "system");
             systemName.innerHTML = "System: "
             systemMessage.classList.add("message");
-            systemMessage.innerHTML = "Error: No UUID matched with provided username, perhaps user doesn't exist? If username does exist please report it to admin. "
+            systemMessage.innerHTML = "Error: No UUID matched with provided username, perhaps the users database was wiped and you haven't logged out? If not contact admin "
             messageElement.appendChild(systemName);
             messageElement.appendChild(systemMessage);
             chatBox.appendChild(messageElement);''', sid=request.sid)
@@ -520,10 +527,10 @@ def index():
                 print(messages)
 
     f = open('blacklist.db')
-    ipBlacklist = f.read().splitlines()
+    Blacklist = f.read().splitlines()
     ip_address = request.remote_addr
     f.close()
-    if ip_address in ipBlacklist:
+    if ip_address in Blacklist:
         return render_template("UhOhYoureBanned.html")
     else:
         if user_on_mobile():
@@ -612,10 +619,12 @@ def login(data):
     hashed_password = cursor.fetchone()
     cursor.execute("SELECT agreement FROM users WHERE username=?", (username,))
     agreed = cursor.fetchone()
+    cursor.execute("SELECT UUID FROM users WHERE username=?", (username,))
+    UUID=cursor.fetchone()
     conn.close()
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         if agreed[0] == 'yes':
-            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
             emit('login_response', {'message': 'Success!', 'colour': 'red'}) 
         else:
            emit('login_response', {'message': 'Account has not agreed to privacy policy, please contact Admin or create new account', 'colour': 'red'}) 
