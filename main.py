@@ -544,6 +544,10 @@ def Login():
 def PrivacyPolicy():
     return render_template("PrivacyPolicy.html")
 
+@app.errorhandler(404)
+def resource_not_found(e):
+    return render_template("404.html")
+
 def create_table_accounts():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()

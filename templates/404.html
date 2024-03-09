@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Error</title>
+    <link rel="stylesheet" href="../static/404.css">
+    <link rel="icon" href="../static/icon.png">
+    <meta property="og:description" content="Uh oh! This webpage doesn't exist.">
+    <meta property="og:author" content="Bailey Miles">
+    <meta property="og:image:type" content="image/png">
+    <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
+<style>
+a.headers {
+    color: whitesmoke;
+    border-color: hsl(219, 30%, 28%);
+
+    padding: 1px 28px;
+    border-radius: 2.4em;
+    border-width: 2px;
+    text-decoration: none;
+    font-size: 20px;
+    line-height: 2.9em;
+    border-style: solid;
+    background-color: transparent;
+    letter-spacing: 2px;
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+@media screen and (max-width: 480px) {
+  a.headers{
+    transform: translate(-140%, -50%);
+  }
+}
+
+</style>
+</head>
+</head>
+<body>
+<h1 id="header" style="text-align: center; scale: 2.4; margin-top: 80px;">Sorry this webpage<br> doesn't exist!</h1>
+<p style="transform: translateY(25px);">
+  Thats alright though! If you think this webpage is correct and you came here <br>from a broken
+  link don't threat to send me an email at <a href="mailto:baileyleah542@gmail.com" style="text-decoration: none; color: salmon;">baileyleah542@gmail.com</a>
+</p>
+<p style="transform: translateY(20px)">
+  Alternatively you can return to the home page by clicking 'Home' at the top of the page!
+</p>
+
+<p style="transform: translateY(40px);">
+  Want to listen to some music?
+</p>
+<!--
+  Yes, Ryan, I built this myself ik its cool it only took a couple hours...
+-->
+<div class="container">
+  <div class="music-player">
+   <nav>
+       <div class="circle">
+           <i class="fa-solid fa-angle-left"></i>
+       </div>        
+       <div class="circle">
+           <i class="fa-solid fa-bars"></i>
+       </div>
+   </nav>
+   <img src="../static/404/thumbnail.webp" class="song-img" id="songImage">
+   <h1 id="songTitle" style="color: white;">Virtual insanity</h1>
+   <p id="songArtist" style="color: white;">Jamiroquai</p>
+
+   <audio id="song"> 
+       <source src="../static/404/404 music.mp3" type="audio/mpeg" id="songSource">
+   </audio>
+   <input type="range" value="0" id="progress">
+
+   <div class="controls">
+       <div onclick = "previousSong()"><i class="fa-solid fa-backward" id="previousSong"></i></div>
+       <div onclick = "playPause()"><i class="fa-solid fa-play" id="ctrlIcon"></i></div>
+       <div onclick = "nextSong()"><i class="fa-solid fa-forward"></i></div>
+   </div>
+
+  </div>
+</div>
+<p style="display: none;" id="Rickroll">
+  get rickrolled >:) in 2023!
+</p>
+<script>
+
+let progress = document.getElementById("progress");
+let song = document.getElementById("song");
+let ctrlIcon = document.getElementById("ctrlIcon");
+let songIcon = document.getElementById("songImage")
+let title = document.getElementById("songTitle")
+let artist = document.getElementById("songArtist")
+let source = document.getElementById("songSource")
+let hiddenText = document.getElementById("Rickroll")
+let currentSong = 1;
+
+function testLoadMetadata(){
+song.onloadedmetadata = function(){
+    progress.max = song.duration;
+    progress.value = song.currentTime;
+   }
+}
+testLoadMetadata();
+function playPause(){
+   if (ctrlIcon.classList.contains("fa-pause")){
+       song.pause();
+       ctrlIcon.classList.remove("fa-pause");
+       ctrlIcon.classList.add("fa-play");
+       songIcon.classList.add("anim-pause");
+       songIcon.classList.remove("anim-play");
+   } else {
+       song.play();
+       ctrlIcon.classList.add("fa-pause");
+       ctrlIcon.classList.remove("fa-play");
+       songIcon.classList.add("anim-play");
+       songIcon.classList.remove("anim-pause");
+   }
+}
+function nextSong(){
+  if (currentSong === 1){
+    song.currentTime = 0;
+    currentSong += 1;
+    song.src = '../static/404/404 music2.mp3';
+    artist.innerHTML = "Rick Astley";
+    title.innerHTML = "Never gonna give you up";
+    songIcon.src = "../static/404/thumbnail2.webp";
+    if (hiddenText.style.display === 'none') {
+      hiddenText.style.display = "block";
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+    testLoadMetadata();
+    song.play();
+    if (ctrlIcon.classList.contains("fa-play")) {
+      ctrlIcon.classList.add("fa-pause");
+      ctrlIcon.classList.remove("fa-play");
+  }} else if (currentSong === 2){
+    song.currentTime = 0;
+    currentSong = 3;
+    song.src = '../static/404/404 music3.mp3';
+    artist.innerHTML = "Roddy Rich";
+    title.innerHTML = "Ballin' - Country cover";
+    songIcon.src = "../static/404/thumbnail3.webp";
+    testLoadMetadata();
+    song.play();
+    if (ctrlIcon.classList.contains("fa-play")) {
+      ctrlIcon.classList.add("fa-pause");
+      ctrlIcon.classList.remove("fa-play");
+  }} else if (currentSong === 3) {
+    song.currentTime = 0;
+    currentSong = 1;
+    song.src = '../static/404/404 music.mp3';
+    artist.innerHTML = "Jamiroquai";
+    title.innerHTML = "Virtual insanity";
+    songIcon.src = "../static/404/thumbnail.webp";
+    testLoadMetadata();
+    song.play();
+    if (ctrlIcon.classList.contains("fa-play")) {
+      ctrlIcon.classList.add("fa-pause");
+      ctrlIcon.classList.remove("fa-play");
+  }
+}}
+
+function previousSong(){
+  if (currentSong === 1){
+    song.currentTime = 0;
+    currentSong = 3;
+    song.src = '../static/404/404 music3.mp3';
+    artist.innerHTML = "Roddy Rich";
+    title.innerHTML = "Ballin' - Country cover";
+    songIcon.src = "../static/404/thumbnail3.webp";
+    testLoadMetadata();
+    song.play();
+    if (ctrlIcon.classList.contains("fa-play")) {
+      ctrlIcon.classList.add("fa-pause");
+      ctrlIcon.classList.remove("fa-play");
+  }} else if (currentSong === 2){
+    song.currentTime = 0;
+    currentSong = 1;
+    song.src = '../static/404/404 music.mp3';
+    artist.innerHTML = "Jamiroquai";
+    title.innerHTML = "Virtual insanity";
+    songIcon.src = "../static/404/thumbnail.webp";
+    testLoadMetadata();
+    song.play();
+    
+    if (ctrlIcon.classList.contains("fa-play")) {
+      ctrlIcon.classList.add("fa-pause");
+      ctrlIcon.classList.remove("fa-play");
+  }} else if (currentSong === 3){
+    song.currentTime = 0;
+    currentSong = 2;
+    song.src = '../static/404/404 music2.mp3';
+    artist.innerHTML = "Rick Astley";
+    title.innerHTML = "Never gonna give you up";
+    songIcon.src = "../static/404/thumbnail2.webp";
+    if (hiddenText.style.display === 'none') {
+      hiddenText.style.display = "block";
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+    testLoadMetadata();
+    song.play();
+  }
+}
+if (song.play()){
+   setInterval(()=>{
+       progress.value = song.currentTime;
+   },500);
+}
+
+progress.onchange = function(){
+   song.play();
+   song.currentTime = progress.value;
+   ctrlIcon.classList.add("fa-pause"); 
+   ctrlIcon.classList.remove("fa-play");
+}
+
+song.addEventListener("ended", function(){
+    nextSong();
+});
+
+if (!song.paused) {
+    ctrlIcon.classList.add("fa-pause");
+    ctrlIcon.classList.remove("fa-play"); 
+    songIcon.classList.remove("anim-pause");
+    songIcon.classList.add("anim-play");
+  } else {  
+  ctrlIcon.classList.add("fa-play");
+  ctrlIcon.classList.remove("fa-pause");
+  songIcon.classList.add("anim-pause");
+  songIcon.classList.remove("anim-play");
+}
+</script><script>
+  var currentUrl = window.location.href;
+  
+  if (currentUrl.endsWith(".html")) {
+      var newUrl = currentUrl.slice(0, -5);
+      window.location.href = newUrl;
+  }
+  </script>
+</body>
