@@ -5,6 +5,7 @@ import sqlite3
 from cryptography.fernet import Fernet
 import bcrypt
 import time
+import json
 import os
 import re
 import html
@@ -69,7 +70,7 @@ app.config['SECRET_KEY'] = 'secret!'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 socketio = SocketIO(app, max_http_buffer_size=16 * 1024 * 1024)
 
-hardBannedNames = ['System', 'system']
+hardBannedNames = ['System', 'system', 'Admin', 'admin']
 
 # Initialize the SQLite database
 def init_db():
@@ -163,6 +164,26 @@ def add_message(username, message, date):
     conn.commit()
     conn.close()
 
+def unbanUser(username):
+    with open('blacklist.json', 'r') as file:
+        ip = json.load(file)
+    with open('blacklistUUID.json', 'r') as file:
+        UUID = json.load(file)
+
+    if username in UUID:
+        uuid = UUID[username]
+        del UUID[username]
+        del UUID[uuid]
+    if username in ip:
+        IP = ip[username]
+        del ip[username]
+        del ip[IP]
+
+    with open('blacklist.json', 'w') as file:
+        json.dump(ip, file)
+    with open('blacklistUUID.json', 'w') as file:
+        json.dump(UUID, file)
+
 def banUser(username):
     #Used for banning users to prevent VPN usage
 
@@ -170,10 +191,25 @@ def banUser(username):
     cursor = conn.cursor()
     cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
     result = cursor.fetchone()
-    print("The result", result[0])
-    f = open('blacklistUUID.db',"a")
-    f.write(result[0]+"\n")
-    f.close()
+    with open('blacklistUUID.json', 'r') as file:
+        data = json.load(file)
+
+    data[username] = result[0]
+    data[result[0]] = username
+
+    with open('blacklistUUID.json', 'w') as file:
+        json.dump(data, file)
+
+    ip = request.remote_addr
+    with open('blacklist.json', 'r') as file:
+        data = json.load(file)
+
+    data[username] = ip
+    data[ip] = username
+
+    with open('blacklist.json', 'w') as file:
+        json.dump(data, file)
+    send_js(f'''location.reload();''', sid=request.sid)
 
 sounds={
     "hellNaw":'"hellNaw"',
@@ -335,7 +371,9 @@ def handleCommands(args):
     elif input == '/ban':
         if args[1] == 'AdminKey':
             banUser(args[2])
-            emit('userToBan', args[2])
+    elif input == '/unban':
+        if args[1] == 'AdminKey':
+            unbanUser(args[2])
     else:
         send_js('''const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
@@ -349,15 +387,6 @@ def handleCommands(args):
             messageElement.appendChild(systemName);
             messageElement.appendChild(systemMessage);
             chatBox.appendChild(messageElement);''', sid=request.sid)
-
-#Ban a user
-@socketio.on('handleIP')
-def handleIP():
-    ip = request.remote_addr
-    with open("blacklist.db", 'a') as f:
-        f.write(f"\n{ip}")
-        f.close()
-    send_js(f'''location.reload();''', sid=request.sid)
 
 #Handle user image upload
 @socketio.on('imageUpload')
@@ -422,10 +451,10 @@ def handle_message(message_data):
     result = cursor.fetchone()
 
     #checking if user is banned
-    f = open('blacklistUUID.db')
-    Blacklist = f.read().splitlines()
+    with open('blacklistUUID.json', 'r') as file:
+        UUIDCheck = json.load(file)
 
-    if UUID in Blacklist:
+    if UUID in UUIDCheck:
         send_js('''const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
             messageElement.classList.add("chat-message")
@@ -438,14 +467,12 @@ def handle_message(message_data):
             messageElement.appendChild(systemName);
             messageElement.appendChild(systemMessage);
             chatBox.appendChild(messageElement);''', sid=request.sid)
-        emit('userToBan', username)
+        banUser(username)
         
         return
 
     if result:
         uuid = result[0]
-        print("Users UUID", UUID)
-        print("Database UUID", uuid)
         if UUID == uuid:
 
             if lowerUser in hardBannedNames:
@@ -511,6 +538,9 @@ def user_on_mobile() -> bool:
 def index():
     newMessageList = [] 
     messages = get_messages()
+    f = open('chatroomVersion.txt')
+    version=f.read()
+    f.close()
     if messages:
         for message in messages:
             if len(message) >= 3:
@@ -526,17 +556,26 @@ def index():
             else:
                 print(messages)
 
-    f = open('blacklist.db')
-    Blacklist = f.read().splitlines()
+        # Read the JSON data from the file
+    with open('blacklist.json', 'r') as file:
+        data = json.load(file)
+
     ip_address = request.remote_addr
-    f.close()
-    if ip_address in Blacklist:
+
+    ipFound = False
+    for value in data.values():
+        # Check if the value matches the IP address
+        if value == ip_address:
+            ipFound = True
+            break  # Break the loop if the IP address is found
+
+    if ipFound:
         return render_template("UhOhYoureBanned.html")
     else:
         if user_on_mobile():
-            return render_template("indexMobile.html", messages=newMessageList)
+            return render_template("indexMobile.html", messages=newMessageList, version=version)
         else:
-            return render_template("index.html", messages=newMessageList)
+            return render_template("index.html", messages=newMessageList, version=version)
 
 
 @app.route("/Login")
@@ -566,7 +605,7 @@ def create_table_accounts():
                       UUID TEXT NOT NULL)''')
     conn.commit()
     conn.close()
-
+ 
 create_table_accounts ()
 
 @socketio.on('OnConnect')
@@ -596,8 +635,6 @@ def register(data):
             emit('registration_response', {'message': 'Reserved username.', 'colour': 'red'})
         elif existing_user:
             emit('registration_response', {'message': 'Username already exists.', 'colour': 'red'})
-        elif agreement != "yes":
-            emit('registration_response', {'message': 'Please agree to the privacy policy and consent service.', 'colour': 'red'})
         else:
             # Hashing password
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())

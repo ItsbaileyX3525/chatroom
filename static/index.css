@@ -115,6 +115,14 @@ Input
     align-items: center;
 }
 
+.chatroom-version {
+    font-size: 15px;
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+    font-size: 18px;
+}
+
 input[type="file"] {
     display: none;
     visibility: hidden;

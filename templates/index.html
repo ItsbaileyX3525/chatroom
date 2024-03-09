@@ -18,12 +18,13 @@
     <div id="chat-box">
       {% for message in messages %}
       <p class="chat-message">
-          <span class="date">{{message[2] }}</span>
+          <span class="date">{{ message[2] }}</span>
           <span class="username">{{ message[0] }}:</span>
           <span class="message">{{ message[1]|safe }}</span>
       </p>
   {% endfor %}
     </div>
+    <div class="chatroom-version">Chatroom version: {{ version }}</div>
     <div class="container">
       <div class="file-upload-container">
         <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>

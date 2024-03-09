@@ -38,7 +38,7 @@ if (!setUsername || !loggedin){
 
 // Submit the form when Enter is pressed in the message input field
 messageInput.addEventListener("keydown", function(event) {
-    if ((event.key === "Enter" && !event.shiftKey) || event.keyCode === 13) {
+    if (event.key === "Enter") {
         event.preventDefault();
 
         var username = setUsername;
@@ -162,7 +162,3 @@ function changeFont(type,url){
         document.body.style.fontFamily = type
     }
 }
-socket.on('userToBan', function(data){
-    if (data == setUsername){
-        socket.emit("handleIP")
-}})
