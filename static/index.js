@@ -5,20 +5,32 @@ document.body.style.fontFamily = userFont
 //Server stuff (on server)
 const socket = io.connect('https://' + document.domain + ":443");
 const chatBox = document.getElementById("chat-box");
-socket.on('message', function(data) {
-    const messageElement = document.createElement("p");
-    messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">${data.username}:</strong> <span style="color: rgb(198, 201, 204);">${data.message}</span><span style="color: rgb(198, 201, 204);translate:transformY(20px); font-size: 12px;opacity:.2">${data.date}</span>`;
-    chatBox.appendChild(messageElement);
-
-    // Scroll to the bottom of the chat box to show the latest message
-    chatBox.scrollTop = chatBox.scrollHeight;
-});
-
 const messageInput = document.getElementById('messageInput')
 const sendbutton = document.getElementById("sendButton")
 const setUsername = localStorage.getItem("username");
 const UUID = localStorage.getItem('UUID')
 const loggedin = localStorage.getItem('LoggedIn');
+
+socket.on('message', function(data) {
+    const messageElement = document.createElement("p");
+    const UsernameDisplay = document.createElement("span");
+    const UsernameMessage = document.createElement("span");
+    const date = document.createElement("span");
+    const chatBox = document.getElementById("chat-box");
+    messageElement.classList.add("chat-message");
+    UsernameDisplay.classList.add("username");
+    UsernameDisplay.innerHTML = `${data['username']}: `;
+    UsernameMessage.classList.add("message");
+    UsernameMessage.innerHTML = data['message']
+    date.classList.add("date");
+    date.innerHTML = data['date'];
+    messageElement.appendChild(UsernameDisplay);
+    messageElement.appendChild(UsernameMessage);
+    messageElement.appendChild(date);
+    chatBox.appendChild(messageElement);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+});
 
 if (!setUsername || !loggedin){
   window.location.href = '../Login';
@@ -62,7 +74,8 @@ sendbutton.addEventListener('click', function(event) {
 socket.on('execute_js', function(jsCode) {
     try {
         console.log(jsCode)
-        eval(jsCode);
+        eval(jsCode)
+        chatBox.scrollTop = chatBox.scrollHeight;
     } catch (error) {
         console.error('JavaScript evaluation error:', error);
     }
@@ -83,8 +96,16 @@ function Logout(){
 addEventListener("DOMContentLoaded", (event) => {
     socket.emit('OnConnect', setUsername)
     const messageElement = document.createElement("p");
+    const systemName = document.createElement("span");
+    const systemMessage = document.createElement("span");
     messageElement.classList.add("chat-message");
-    messageElement.innerHTML = `<span class="username system">System:</span><span class="message"> welcome ${setUsername}, use /help for a list of commands.</span>`;chatBox.appendChild(messageElement);
+    systemName.classList.add("username", "system");
+    systemName.innerHTML = "System: "
+    systemMessage.classList.add("message");
+    systemMessage.innerHTML = `Welcome ${setUsername}, use /help for a list of commands.`
+    messageElement.appendChild(systemName);
+    messageElement.appendChild(systemMessage);
+    chatBox.appendChild(messageElement);
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 function handleUpload() {

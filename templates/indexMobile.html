@@ -7,6 +7,7 @@
     <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="static/indexMobile.css">
+    
     <meta property="og:title" content="Bailey's chatroom">
     <meta property="og:description" content="Welcome to the chatroom of Bailey, talk discuss and do whatever!">
     <meta property="og:image" content="https://i.ibb.co/rpgNnkK/image.png">
@@ -16,16 +17,16 @@
     <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
     <div id="chat-box">
       {% for message in messages %}
-      <p>
-          <strong>{{ message[0] }}:</strong>
-          <span>{{ message[1]|safe }}</span>
-          <span>{{message[2] }}</span>
+      <p class="chat-message">
+          <span class="username">{{ message[0] }}:</span>
+          <span class="message">{{ message[1]|safe }}</span>
+          <span class="date">{{message[2] }}</span>
       </p>
   {% endfor %}
     </div>
     <div class="container">
       <div class="file-upload-container">
-        <label for="uploadImage"><i id="uploadButton" class="fa-regular fa-file-image fa-2xl"></i></label>
+        <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
         <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();"></input>
       </div>
       <textarea id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>

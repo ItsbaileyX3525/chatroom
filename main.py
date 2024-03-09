@@ -212,43 +212,85 @@ def handleCommands(args):
         if len(args) == 1:
             args = None
         send_js(f'''const chatBox = document.getElementById("chat-box");
-                    const messageElement = document.createElement("p");
-                    messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                    <span style="color: rgb(198, 201, 204);"> {"The current list of commands are: /help, /emojis, /emojiList, /fullEmojiList, /play, /playList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (NewPassword)" if args[1] == "changePwd" or args[1]=='/changePwd' else 'Syntax is /play (soundName), example /play hellNaw' if args[1]=='/play' or args[1]=='play' else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} </span>`;
-                    chatBox.appendChild(messageElement);''', sid=request.sid)
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "{"The current list of commands are: /help, /emojis, /emojiList, /play, /playList, /font and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (NewPassword)" if args[1] == "changePwd" or args[1]=='/changePwd' else 'Syntax is /play (soundName), example /play hellNaw' if args[1]=='/play' or args[1]=='play' else 'Syntax is /font (FontName), example /font RobotoMono' if args[1]=="/font" or args[1]=="font" else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} "
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/emojis':
         send_js('''const chatBox = document.getElementById("chat-box");
-                     const messageElement = document.createElement("p");
-                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                     <span style="color: rgb(198, 201, 204);"> To use emojis it's like discord, so it's :skull: to see a list of popular emojis use /emojiList </span>`;
-                     chatBox.appendChild(messageElement);''', sid=request.sid)
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "To use emojis it's like discord, so it's :skull: to see a list of popular emojis use /emojiList"
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/emojiList':
         send_js('''const chatBox = document.getElementById("chat-box");
-                     const messageElement = document.createElement("p");
-                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                     <span style="color: rgb(198, 201, 204);"> The top 4 used are: :skull:, :smile:, :cry:, :thumbs_up: to see all of them use /fullEmojiList </span>`;
-                     chatBox.appendChild(messageElement);''', sid=request.sid)
-    elif input == '/fullEmojiList':
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "To use emojis it's like discord, so it's :skull: to see a list of popular emojis use /emojiList"
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
+    elif input == '/changePwd': #Currently does not work (too tired too fix atm)
+        #success = change_password(args[1], args[2])
         send_js('''const chatBox = document.getElementById("chat-box");
-                     const messageElement = document.createElement("p");
-                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                     <span style="color: rgb(198, 201, 204);"> Enjoy :)\nJk lol I'm not going to flood you with 900 lines of emojis but you can view the emoji list from <a target="_blank" href="https://pastebin.com/1b0QnGxg">here</a></span>`;
-                     chatBox.appendChild(messageElement);''', sid=request.sid)
-    elif input == '/changePwd':
-        success = change_password(args[1], args[2])
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "Sorry change password doesn't work at the moment contact admin to change your password"
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
+        """
         send_js(f'''const chatBox = document.getElementById("chat-box");
-                     const messageElement = document.createElement("p");
-                     messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                     <span style="color: rgb(198, 201, 204);"> {f'Successfully changed password to {args}' if success else f'Failed to change the password to {args}' } </span>`;
-                     chatBox.appendChild(messageElement);''', sid=request.sid)
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "{f'Successfully changed password to {args}' if success else f'Failed to change the password to {args}' }"
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)"""
     elif input == '/wipe':
-        if args == 'AdminKey':
+        if args[1] == 'AdminKey':
             clear_messages()        
         else:
             send_js('''const chatBox = document.getElementById("chat-box");
                 const messageElement = document.createElement("p");
-                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key </span>`;
+                messageElement.classList.add("chat-message")
+                const systemName = document.createElement("span");
+                const systemMessage = document.createElement("span");
+                systemName.classList.add("username", "system");
+                systemName.innerHTML = "System: "
+                systemMessage.classList.add("message");
+                systemMessage.innerHTML = "Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key"
+                messageElement.appendChild(systemName);
+                messageElement.appendChild(systemMessage);
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == "/font":
         if args[1] in fonts:
@@ -256,10 +298,17 @@ def handleCommands(args):
 
     elif input == '/playList':
         send_js('''const chatBox = document.getElementById("chat-box");
-                const messageElement = document.createElement("p");
-                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Current list of fonts are: 'Helvetica', 'RobotoMono', 'SourceCodePro', 'Normal' and 'ComicSans'. </span>`;
-                chatBox.appendChild(messageElement);''', sid=request.sid)
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "Current list of fonts are: 'Helvetica', 'RobotoMono', 'SourceCodePro', 'Normal' and 'ComicSans'"
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
     
     elif input == '/play':
         if args[1] in sounds:
@@ -270,18 +319,32 @@ def handleCommands(args):
 
     elif input == '/playList':
         send_js('''const chatBox = document.getElementById("chat-box");
-                const messageElement = document.createElement("p");
-                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Current list of sounds are: 'hellNaw', 'clang', 'gay', 'pluh', 'whatDaDogDoin', 'boom' and 'mew'. </span>`;
-                chatBox.appendChild(messageElement);''', sid=request.sid)
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "Current list of sounds are: 'hellNaw', 'clang', 'gay', 'pluh', 'whatDaDogDoin', 'boom' and 'mew'"
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/destroyAll':
         if args[1] == "AdminKey":
             wipeEverything()
         else:
             send_js('''const chatBox = document.getElementById("chat-box");
                 const messageElement = document.createElement("p");
-                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Sorry but that key just isn't right. </span>`;
+                messageElement.classList.add("chat-message")
+                const systemName = document.createElement("span");
+                const systemMessage = document.createElement("span");
+                systemName.classList.add("username", "system");
+                systemName.innerHTML = "System: "
+                systemMessage.classList.add("message");
+                systemMessage.innerHTML = "Sorry but that key just isn't right"
+                messageElement.appendChild(systemName);
+                messageElement.appendChild(systemMessage);
                 chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/ban':
         if args[1] == 'AdminKey':
@@ -289,10 +352,17 @@ def handleCommands(args):
             emit('userToBan', args[2])
     else:
         send_js('''const chatBox = document.getElementById("chat-box");
-                const messageElement = document.createElement("p");
-                messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                <span style="color: rgb(198, 201, 204);"> Sorry I don't believe that is a command, perhaps check your spelling? </span>`;
-                chatBox.appendChild(messageElement);''', sid=request.sid)
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "Sorry I don't believe that is a command, perhaps check your spelling?"
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
 
 #Ban a user
 @socketio.on('handleIP')
@@ -367,7 +437,8 @@ def handle_message(message_data):
 
     if result:
         uuid = result[0]
-
+        print("Users UUID", UUID)
+        print("Database UUID", uuid)
         if UUID == uuid:
 
             if lowerUser in hardBannedNames:
@@ -395,15 +466,29 @@ def handle_message(message_data):
         else:
                 send_js('''const chatBox = document.getElementById("chat-box");
                     const messageElement = document.createElement("p");
-                    messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-                    <span style="color: rgb(198, 201, 204);"> Error: UUID mismatch. This is usually because you tried sending a custom message with a different username, if not please contact admin. </span>`;
+                    messageElement.classList.add("chat-message")
+                    const systemName = document.createElement("span");
+                    const systemMessage = document.createElement("span");
+                    systemName.classList.add("username", "system");
+                    systemName.innerHTML = "System: "
+                    systemMessage.classList.add("message");
+                    systemMessage.innerHTML = "Your current UUID doesn't match with the username provided, perhaps you tried to use a custom name? If not please contact the admin."
+                    messageElement.appendChild(systemName);
+                    messageElement.appendChild(systemMessage);
                     chatBox.appendChild(messageElement);''', sid=request.sid)
     else:
         send_js('''const chatBox = document.getElementById("chat-box");
-        const messageElement = document.createElement("p");
-        messageElement.innerHTML = `<strong style="color: rgb(198, 201, 204);">System:</strong>
-        <span style="color: rgb(198, 201, 204);"> Error: No UUID matched with provided username, perhaps user doesn't exist? </span>`;
-        chatBox.appendChild(messageElement);''', sid=request.sid)  
+            const messageElement = document.createElement("p");
+            messageElement.classList.add("chat-message")
+            const systemName = document.createElement("span");
+            const systemMessage = document.createElement("span");
+            systemName.classList.add("username", "system");
+            systemName.innerHTML = "System: "
+            systemMessage.classList.add("message");
+            systemMessage.innerHTML = "Error: No UUID matched with provided username, perhaps user doesn't exist? If username does exist please report it to admin. "
+            messageElement.appendChild(systemName);
+            messageElement.appendChild(systemMessage);
+            chatBox.appendChild(messageElement);''', sid=request.sid)
 
 def user_on_mobile() -> bool:
 
