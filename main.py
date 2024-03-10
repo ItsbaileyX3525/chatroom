@@ -427,20 +427,11 @@ def handle_message(message_data):
                     send({'username': username, 'message': escaped_message, 'date': date}, broadcast=True)
                     send_js("""notifyUser()""")
         else:
-                send_js('''const chatBox = document.getElementById("chat-box");
-                    const messageElement = document.createElement("p");
-                    messageElement.classList.add("chat-message")
-                    const systemName = document.createElement("span");
-                    const systemMessage = document.createElement("span");
-                    systemName.classList.add("username", "system");
-                    systemName.innerHTML = "System: "
-                    systemMessage.classList.add("message");
-                    systemMessage.innerHTML = "Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not"
-                    messageElement.appendChild(systemName);
-                    messageElement.appendChild(systemMessage);
-                    chatBox.appendChild(messageElement);''', sid=request.sid)
+                send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", 
+                                    sid=request.sid)
     else:
-        send_system_message("Error: No UUID matched with provided username, perhaps the users database was wiped and you haven't logged out? If not contact admin ", sid=request.sid)
+        send_system_message("Error: No UUID matched with provided username, perhaps the users database was wiped and you haven't logged out? If not contact admin ",
+                            sid=request.sid)
 
 def user_on_mobile() -> bool:
 
@@ -521,7 +512,7 @@ def create_table_accounts():
     conn.commit()
     conn.close()
  
-create_table_accounts ()
+create_table_accounts()
 
 @socketio.on('OnConnect')
 def connected(username):
