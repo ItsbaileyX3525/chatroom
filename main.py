@@ -227,7 +227,7 @@ fonts={
     "SourceCodePro":"'Custom4'",
     "ComicSans":"'Custom2'"
 }
-def handleCommands(args):
+def handleCommands(args,username):
     input = args[0]
     print(len(args))
     if input == '/help':
@@ -241,7 +241,7 @@ def handleCommands(args):
             systemName.classList.add("username", "system");
             systemName.innerHTML = "System: "
             systemMessage.classList.add("message");
-            systemMessage.innerHTML = "{"The current list of commands are: /help, /emojis, /emojiList, /play, /playList, /font and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (NewPassword)" if args[1] == "changePwd" or args[1]=='/changePwd' else 'Syntax is /play (soundName), example /play hellNaw' if args[1]=='/play' or args[1]=='play' else 'Syntax is /font (FontName), example /font RobotoMono' if args[1]=="/font" or args[1]=="font" else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} "
+            systemMessage.innerHTML = "{"The current list of commands are: /help, /emojis, /emojiList, /play, /playList, /font, /fontList and /changePwd for specific help use /help (command)" if args is None else "Syntax is /changePwd (NewPassword)" if args[1] == "changePwd" or args[1]=='/changePwd' else 'Syntax is /play (soundName), example /play hellNaw' if args[1]=='/play' or args[1]=='play' else 'Syntax is /font (FontName), example /font RobotoMono' if args[1]=="/font" or args[1]=="font" else "That command doesn't exist or doesn't have any help related to it." if args is None or args != '' else None} "
             messageElement.appendChild(systemName);
             messageElement.appendChild(systemMessage);
             chatBox.appendChild(messageElement);''', sid=request.sid)
@@ -272,8 +272,9 @@ def handleCommands(args):
             messageElement.appendChild(systemMessage);
             chatBox.appendChild(messageElement);''', sid=request.sid)
     elif input == '/changePwd': #Currently does not work (too tired too fix atm)
-        #success = change_password(args[1], args[2])
-        send_js('''const chatBox = document.getElementById("chat-box");
+        success = change_password(username,args[1])
+        if success:
+            send_js(f'''const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
             messageElement.classList.add("chat-message")
             const systemName = document.createElement("span");
@@ -281,23 +282,10 @@ def handleCommands(args):
             systemName.classList.add("username", "system");
             systemName.innerHTML = "System: "
             systemMessage.classList.add("message");
-            systemMessage.innerHTML = "Sorry change password doesn't work at the moment contact admin to change your password"
+            systemMessage.innerHTML = "{f'Successfully changed password to {args[1]}' if success else f'Failed to change the password to {args[1]}' }"
             messageElement.appendChild(systemName);
             messageElement.appendChild(systemMessage);
             chatBox.appendChild(messageElement);''', sid=request.sid)
-        """
-        send_js(f'''const chatBox = document.getElementById("chat-box");
-            const messageElement = document.createElement("p");
-            messageElement.classList.add("chat-message")
-            const systemName = document.createElement("span");
-            const systemMessage = document.createElement("span");
-            systemName.classList.add("username", "system");
-            systemName.innerHTML = "System: "
-            systemMessage.classList.add("message");
-            systemMessage.innerHTML = "{f'Successfully changed password to {args}' if success else f'Failed to change the password to {args}' }"
-            messageElement.appendChild(systemName);
-            messageElement.appendChild(systemMessage);
-            chatBox.appendChild(messageElement);''', sid=request.sid)"""
     elif input == '/wipe':
         if args[1] == 'AdminKey':
             clear_messages()        
@@ -318,7 +306,7 @@ def handleCommands(args):
         if args[1] in fonts:
             send_js(f"""changeFont({fonts[args[1]]});localStorage.setItem('font', {fonts[args[1]]});""", sid=request.sid)
 
-    elif input == '/playList':
+    elif input == '/fontList':
         send_js('''const chatBox = document.getElementById("chat-box");
             const messageElement = document.createElement("p");
             messageElement.classList.add("chat-message")
@@ -479,7 +467,7 @@ def handle_message(message_data):
                 send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
             elif trimmedMessage[0].startswith("/"):
                 message = message.split()
-                handleCommands(message)
+                handleCommands(message,username)
 
             else:
                 if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):

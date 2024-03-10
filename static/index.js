@@ -1,6 +1,6 @@
 //Webpage stuff (not on server)
 userFont = localStorage.getItem('font') || 'Normal'
-document.body.style.fontFamily = userFont
+document.documentElement.style.setProperty('--font-family:', userFont);
 
 //Server stuff (on server)
 const socket = io.connect('https://' + document.domain + ":443");
@@ -159,6 +159,6 @@ function playAudio(type,url=""){
 }
 function changeFont(type,url){
     if (type !="custom"){
-        document.body.style.fontFamily = type
+        document.documentElement.style.setProperty('--font-family:', type);
     }
 }
