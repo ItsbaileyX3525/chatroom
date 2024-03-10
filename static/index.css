@@ -48,6 +48,22 @@ body {
     font-size: 1.5rem;
     background-color: var(--background-dark);
     overflow: hidden;
+    margin: 0 1%;
+}
+/*
+Notification
+*/
+
+#notification {
+    display: none;
+    background-color: var(--validation-color);
+    color: var(--text-color);
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 /*
@@ -63,6 +79,7 @@ Chat Box
     word-wrap: break-word;
     color: var(--text-color);
     padding: 0 15px;
+    margin-top: calc(1.5rem + 20px + 2%);
 }
 
 .chat-message{
@@ -89,8 +106,8 @@ Chat Box
     font-size: 60%;
     color: var(--text-color);
     position: absolute;
-    right: 0px;
-    top: 0px;
+    right: .5%;
+    top: 1%;
 }
 
 .chat-message .username.system{
@@ -109,17 +126,10 @@ Input
 .container {
     width: 100%;
     max-width: 800px;
-    margin: 50px auto;
+    margin: 2vh auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.chatroom-version {
-    position: absolute;
-    bottom: 8px;
-    left: 16px;
-    font-size: 18px;
 }
 
 input[type="file"] {
@@ -175,16 +185,16 @@ input[type="file"] {
     transform: scale(var(--scale-factor));
 }
 
-#notification {
-    display: none;
-    background-color: var(--validation-color);
+/*
+Misc
+*/
+
+.chatroom-version {
+    position: absolute;
+    bottom: 2%;
+    left: 1%;
+    font-size: 70%;
     color: var(--text-color);
-    text-align: center;
-    padding: 10px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
 }
 
 .logout-button {
@@ -195,16 +205,16 @@ input[type="file"] {
     cursor: pointer;
     font-family: var(--font-family);
     font-size: 100%;
-    height: 44px;
     line-height: 1.15;
-    padding: 0 25px;
+    padding: 10px 2%;
     position: absolute;
-    bottom: 3%;
+    bottom: 2%;
     right: 3%;
     text-align: center;
     border: 0 solid;
     text-shadow: none;
     transition: all var(--anim-length) ease-in-out;
+    max-height: 50px;
 }
 .logout-button:hover:not(:disabled) {
     transform: scale(var(--scale-factor));
@@ -242,4 +252,45 @@ input[type="file"] {
 
 *::-webkit-scrollbar-thumb:active {
     background-color: var(--light-blue);
+}
+
+/*
+Mobile
+*/
+
+@media (orientation: portrait) {
+    body{
+        margin: 0 3%;
+        font-size: 1.3rem;
+    }
+    #chat-box{
+        height: 75vh;
+        margin-top: calc(1.3rem + 20px + 5%);
+    }
+    .chat-message .date{
+        font-size: 50%;
+        top: 3%;
+        right: 1.5%;
+    }
+    .container {
+        margin: 5% 0;
+    }
+    .file-upload-container {
+        order: 1;
+    }
+    .send-button-container {
+        order: 2;
+    }
+    .input-field {
+        width: 75%;
+    }
+    .chatroom-version{
+        left: 3%;
+        bottom: 2%;
+    }
+    .logout-button{
+        right: 3%;
+        bottom: 2%;
+        padding: 1% 2%;
+    }
 }

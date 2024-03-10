@@ -2,39 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <title>Bailey's chatroom</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="static/index.css">
-    
-    <meta property="og:title" content="Bailey's chatroom">
-    <meta property="og:description" content="Welcome to the chatroom of Bailey, talk discuss and do whatever!">
-    <meta property="og:image" content="https://i.ibb.co/rpgNnkK/image.png">
+        <title>Bailey's chatroom</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" href="static/index.css">
+        
+        <meta property="og:title" content="Bailey's chatroom">
+        <meta property="og:description" content="Welcome to the chatroom of Bailey, talk discuss and do whatever!">
+        <meta property="og:image" content="https://i.ibb.co/rpgNnkK/image.png">
 </head>
 <body>
-  <div id="notification">This is a custom notification!</div>
-    <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
+    <div id="notification">This is a custom notification!</div>
     <div id="chat-box">
-      {% for message in messages %}
-      <p class="chat-message">
-          <span class="date">{{ message[2] }}</span>
-          <span class="username">{{ message[0] }}:</span>
-          <span class="message">{{ message[1]|safe }}</span>
-      </p>
-  {% endfor %}
+        {% for message in messages %}
+            <p class="chat-message">
+                    <span class="date">{{ message[2] }}</span>
+                    <span class="username">{{ message[0] }}:</span>
+                    <span class="message">{{ message[1]|safe }}</span>
+            </p>
+        {% endfor %}
+    </div>
+    <div class="container">
+        <div class="file-upload-container">
+            <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
+            <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();"></input>
+        </div>
+        <textarea id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>
+        <div class="send-button-container">
+            <button id="sendButton" class="send-button">&#10148;</button>
+        </div>
     </div>
     <div class="chatroom-version">Chatroom version: {{ version }}</div>
-    <div class="container">
-      <div class="file-upload-container">
-        <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
-        <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();"></input>
-      </div>
-      <textarea id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>
-      <div class="send-button-container">
-        <button id="sendButton" class="send-button">&#10148;</button>
-      </div>
-    </div>
+    <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="../static/index.js"></script>
 </body>

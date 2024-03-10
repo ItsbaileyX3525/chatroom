@@ -560,10 +560,7 @@ def index():
     if ipFound:
         return render_template("UhOhYoureBanned.html")
     else:
-        if user_on_mobile():
-            return render_template("indexMobile.html", messages=newMessageList, version=version)
-        else:
-            return render_template("index.html", messages=newMessageList, version=version)
+        return render_template("index.html", messages=newMessageList, version=version)
 
 
 @app.route("/Login")
