@@ -36,40 +36,146 @@ if (!setUsername || !loggedin){
   window.location.href = '../Login';
 }
 
+function send_system_message(msg){
+    const messageElement = document.createElement("p");
+    const systemName = document.createElement("span");
+    const systemMessage = document.createElement("span");
+    messageElement.classList.add("chat-message");
+    systemName.classList.add("username", "system");
+    systemName.innerHTML = "System: "
+    systemMessage.classList.add("message");
+    systemMessage.innerHTML = msg
+    messageElement.appendChild(systemName);
+    messageElement.appendChild(systemMessage);
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+customAudios = {
+    "hellNaw" : new Audio('static/HELLNAW.ogg'),
+    "clang" : new Audio('static/clang.mp3'),
+    "mew" : new Audio('static/mew.mp3'),
+    "boom" : new Audio('static/boom.mp3'),
+    "pluh" : new Audio('static/pluh.mp3'),
+    "whatDaDogDoin" : new Audio('static/whatDaDogDoin.mp3'),
+    "gay" : new Audio('static/gay.mp3')
+}
+
+fonts={
+    "Helvetica":"'Custom1'",
+    "Normal":"'Normal'",
+    "RobotoMono":"'Custom3'",
+    "SourceCodePro":"'Custom4'",
+    "ComicSans":"'Custom2'"
+}
+
+function show_help(){
+    args = arguments[0];
+    if (args.length > 0){
+        if (args[0] === "changePwd" || args[0]==='/changePwd') {
+            msg = "Syntax is /changePwd (NewPassword)"}
+        else if (args[0]==='/play' || args[0]==='play'){
+            msg = 'Syntax is /play (soundName), example /play hellNaw'}
+        else if (args[0]==="/font" || args[0]==="font"){
+            msg = 'Syntax is /font (FontName), example /font RobotoMono' }
+        else{
+            msg = "That command doesn't exist or doesn't have any help related to it." }}
+    else{
+        msg = "The current list of commands are: /help, /emojis, /emojiList, /play, /playList, /font, /fontList and /changePwd for specific help use /help (command)"}
+    send_system_message(msg)
+    return true
+}
+
+function get_emojis(){
+    send_system_message("To use emojis it's like discord, so it's :skull: to see a list of popular emojis use /emojiList")
+    return true
+}
+
+function emoji_list(){
+    send_system_message("The top 4 used are: :skull:, :smile:, :cry:, :thumbs_up:")
+    return true
+}
+
+function change_font(){
+    args = arguments[0]
+    if (args[0] in fonts){
+        changeFont(fonts[args[0]]);
+        localStorage.setItem("font", fonts[args[0]]);
+    }
+    return true
+}
+
+function font_list(){
+    send_system_message("Current list of fonts are: 'Helvetica', 'RobotoMono', 'SourceCodePro', 'Normal' and 'ComicSans'")
+    return true
+}
+
+function sound_list(){
+    send_system_message("Current list of sounds are: 'hellNaw', 'clang', 'gay', 'pluh', 'whatDaDogDoin', 'boom' and 'mew'")
+    return true
+}
+
+cmds = {
+    "/help": show_help,
+    "/emojis": get_emojis,
+    "/emojiList": emoji_list,
+    "/font": change_font,
+    "/fontList": font_list,
+    "/playList": sound_list,
+}
+
+
 // Submit the form when Enter is pressed in the message input field
-messageInput.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
+messageInput.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
 
         var username = setUsername;
         const message = messageInput.value;
-        username = username.trim()
-    if (message && ! username){
-        alert("You need a username.")
-    } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
+        username = username.trim();
+
+
+        if (message.startsWith("/")){
+            console.log("Sent")
+            var command = message.trim().split(" ");
+            if (command[0] in cmds){
+                console.log(command[0]);
+                const func = cmds[command[0]];
+                const success = func(command.slice(1));
+                if (success){
+                    messageInput.value = "";
+                    return
+                }
+        }}
+        else if (message){
         socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
-        messageInput.value = "";
-    } if (bannedNames.includes(username)){
-        alert("This is a reserved name, sorry.")
-    }
-    }
-});
+        messageInput.value = "";}
+}});
 
-bannedNames = ['System', 'system']
 
-sendbutton.addEventListener('click', function(event) {
+
+sendbutton.addEventListener('click', function(e) {
     var username = setUsername;
     const message = messageInput.value;
-    username = username.trim()
+    username = username.trim();
 
-    if (message && ! username){
-        alert("You need a username.")
-    } else if (!bannedNames.includes(username) && username && message && username != 'Admin' && username != 'admin'){
-        socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
-        messageInput.value = "";
-    } if (bannedNames.includes(username)){
-    alert("This is a reserved name, sorry.")
-}
+    console.log(message)
+
+    if (message.startsWith("/")){
+        console.log("Sent")
+        var command = message.split(" ");
+        if (command[0] in cmds){
+            console.log(command[0]);
+            const func = cmds[command[0]];
+            const success = func(command.slice(1));
+            if (success){
+                messageInput.value = "";
+                return
+            }
+    }}
+    else if (message){
+    socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
+    messageInput.value = "";}
 })
 socket.on('execute_js', function(jsCode) {
     try {
@@ -95,18 +201,7 @@ function Logout(){
 }
 addEventListener("DOMContentLoaded", (event) => {
     socket.emit('OnConnect', setUsername)
-    const messageElement = document.createElement("p");
-    const systemName = document.createElement("span");
-    const systemMessage = document.createElement("span");
-    messageElement.classList.add("chat-message");
-    systemName.classList.add("username", "system");
-    systemName.innerHTML = "System: "
-    systemMessage.classList.add("message");
-    systemMessage.innerHTML = `Welcome ${setUsername}, use /help for a list of commands.`
-    messageElement.appendChild(systemName);
-    messageElement.appendChild(systemMessage);
-    chatBox.appendChild(messageElement);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    send_system_message(`Welcome ${setUsername}, use /help for a list of commands.`)
 });
 function handleUpload() {
 const input = document.getElementById('uploadImage');
@@ -138,16 +233,6 @@ function notifyUser(){
         discordNotifaction.play();
 }}
 
-//All the custom sounds, idk
-customAudios = {
-    "hellNaw" : new Audio('static/HELLNAW.ogg'),
-    "clang" : new Audio('static/clang.mp3'),
-    "mew" : new Audio('static/mew.mp3'),
-    "boom" : new Audio('static/boom.mp3'),
-    "pluh" : new Audio('static/pluh.mp3'),
-    "whatDaDogDoin" : new Audio('static/whatDaDogDoin.mp3'),
-    "gay" : new Audio('static/gay.mp3')
-}
 
 function playAudio(type,url=""){
     if (type != "custom"){
@@ -157,8 +242,7 @@ function playAudio(type,url=""){
         new Audio(url).play()
     }
 }
-function changeFont(type,url){
-    if (type !="custom"){
-        document.documentElement.style.setProperty('--font-family:', type);
-    }
+function changeFont(type){
+    const root = document.querySelector(':root');
+    root.style.setProperty('--font-family', type);
 }

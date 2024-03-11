@@ -242,22 +242,6 @@ def send_system_message(message, sid):
         messageElement.appendChild(systemMessage);
         chatBox.appendChild(messageElement);''', sid=sid)
 
-def show_help(props={},*args):
-    if len(args) > 0:
-        if args[0] == "changePwd" or args[0]=='/changePwd' :
-            msg = "Syntax is /changePwd (NewPassword)" 
-        elif args[0]=='/play' or args[0]=='play': 
-            msg = 'Syntax is /play (soundName), example /play hellNaw' 
-        elif args[0]=="/font" or args[0]=="font":
-            msg = 'Syntax is /font (FontName), example /font RobotoMono' 
-        else:
-            msg = "That command doesn't exist or doesn't have any help related to it." 
-    else:
-        msg = "The current list of commands are: /help, /emojis, /emojiList, /play, /playList, /font, /fontList and /changePwd for specific help use /help (command)"
-    send_system_message(msg, sid=request.sid)
-
-def get_emojis(props={},*args):
-    send_system_message("To use emojis it's like discord, so it's :skull: to see a list of popular emojis use /emojiList", sid=request.sid)
 
 #Currently does not work (too tired too fix atm)
 def change_pwd(props={},*args):
@@ -271,13 +255,6 @@ def wipe(props={},*args):
     else:
         send_system_message("Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key", sid=request.sid)
 
-def change_font(props={},*args):
-    if args[0] in fonts:
-        send_js(f"""changeFont({fonts[args[0]]});localStorage.setItem('font', {fonts[args[0]]});""", sid=request.sid)
-
-def font_list(props={},*args):
-    send_system_message("Current list of fonts are: 'Helvetica', 'RobotoMono', 'SourceCodePro', 'Normal' and 'ComicSans'", sid=request.sid)
-    
 def play_sound(props={},*args):
     if args[0] in sounds:
         send_js(f"""playAudio({sounds[args[0]]})""")
@@ -285,9 +262,6 @@ def play_sound(props={},*args):
         if re.match(r'(https?://.*\.(?:mp3|ogg))', args[0]):#
             send_js(f'''playAudio('custom', "{args[0]}")''')
             
-def sound_list(props={},*args):
-    send_system_message("Current list of sounds are: 'hellNaw', 'clang', 'gay', 'pluh', 'whatDaDogDoin', 'boom' and 'mew'", sid=request.sid)
-
 def destroy_all(props={},*args):
     if args[0] == "AdminKey":
         wipeEverything()
@@ -303,15 +277,9 @@ def unban(props={},*args):
         unbanUser(args[1])
 
 cmds = {
-    "/help": show_help,
-    "/emojis": get_emojis,
-    "/emojiList": sound_list,
     "/changePwd": change_pwd,
     "/wipe": wipe,
-    "/font": change_font,
-    "/fontList": font_list,
     "/play": play_sound,
-    "/playList": sound_list,
     "/destroyAll": destroy_all,
     "/ban": ban,
     "/unban": unban
@@ -320,7 +288,6 @@ cmds = {
 
 def handleCommands(args,username):
     cmd_name = args.pop(0)
-    #print(len(args))
     if cmd_name in cmds:
         f = cmds[cmd_name]
         props = {"username":username}
@@ -473,10 +440,9 @@ def index():
 
     ipFound = False
     for value in data.values():
-        # Check if the value matches the IP address
         if value == ip_address:
             ipFound = True
-            break  # Break the loop if the IP address is found
+            break
 
     if ipFound:
         return render_template("UhOhYoureBanned.html")
