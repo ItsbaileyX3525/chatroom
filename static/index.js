@@ -133,20 +133,17 @@ messageInput.addEventListener("keydown", function(e) {
         var username = setUsername;
         const message = messageInput.value;
         username = username.trim();
+        var command = message.trim().split(" ");
 
-
-        if (message.startsWith("/")){
-            console.log("Sent")
-            var command = message.trim().split(" ");
-            if (command[0] in cmds){
-                console.log(command[0]);
-                const func = cmds[command[0]];
-                const success = func(command.slice(1));
-                if (success){
-                    messageInput.value = "";
-                    return
-                }
-        }}
+        if (command[0] in cmds){
+            console.log(command[0]);
+            const func = cmds[command[0]];
+            const success = func(command.slice(1));
+            if (success){
+                messageInput.value = "";
+                return
+            }
+        }
         else if (message){
         socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
         messageInput.value = "";}
@@ -158,21 +155,17 @@ sendbutton.addEventListener('click', function(e) {
     var username = setUsername;
     const message = messageInput.value;
     username = username.trim();
+    var command = message.trim().split(" ");
 
-    console.log(message)
-
-    if (message.startsWith("/")){
-        console.log("Sent")
-        var command = message.split(" ");
-        if (command[0] in cmds){
-            console.log(command[0]);
-            const func = cmds[command[0]];
-            const success = func(command.slice(1));
-            if (success){
-                messageInput.value = "";
-                return
-            }
-    }}
+    if (command[0] in cmds){
+        console.log(command[0]);
+        const func = cmds[command[0]];
+        const success = func(command.slice(1));
+        if (success){
+            messageInput.value = "";
+            return
+        }
+    }
     else if (message){
     socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
     messageInput.value = "";}
