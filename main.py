@@ -1,3 +1,6 @@
+#Hello future bailey, you'll need to save the user colour to the databse otherwise on reload it'll just display as blue again
+
+
 #import the required modules
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, send, emit
@@ -77,7 +80,7 @@ def init_db():
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS messages
-                      (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, message TEXT, date TEXT)''')
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, message TEXT, date TEXT, colour TEXT)''')
     conn.commit()
     conn.close()
 
@@ -85,7 +88,7 @@ def init_db():
 def get_messages():
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
-    cursor.execute("SELECT username, message, date FROM messages ORDER BY id ASC")
+    cursor.execute("SELECT username, message, date, colour FROM messages ORDER BY id ASC")
     messages = cursor.fetchall()
     conn.close()
     return messages
@@ -154,13 +157,13 @@ def wipeEverything():
 
 
 # Function to add a new message to the database
-def add_message(username, message, date):
-    message = str.encode(message);username = str.encode(username)
+def add_message(username, message, date, colour):
+    message = str.encode(message);username = str.encode(username);
     message = cipher_suite.encrypt(message)
     username = cipher_suite.encrypt(username)
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO messages (username, message, date) VALUES (?, ?, ?)", (username, message, date))
+    cursor.execute("INSERT INTO messages (username, message, date, colour) VALUES (?, ?, ?, ?)", (username, message, date, colour))
     conn.commit()
     conn.close()
 
@@ -261,7 +264,15 @@ def play_sound(props={},*args):
     else:
         if re.match(r'(https?://.*\.(?:mp3|ogg))', args[0]):#
             send_js(f'''playAudio('custom', "{args[0]}")''')
-            
+
+def change_colour(props={},*args):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT colour FROM users WHERE username = ?", (props["username"],))
+    result = cursor.fetchone()
+
+    conn.close()
+
 def destroy_all(props={},*args):
     if args[0] == "AdminKey":
         wipeEverything()
@@ -282,6 +293,7 @@ cmds = {
     "/play": play_sound,
     "/destroyAll": destroy_all,
     "/ban": ban,
+    "/colour": change_colour,
     "/unban": unban
 }
     
@@ -300,6 +312,7 @@ def handleCommands(args,username):
 def handle_user_upload(imageData):
     imageType = imageData[1]
     username = imageData[2]
+    colour = imageData[3]
     date = epoch_to_dd_mm_yyyy()
     randomImageName = get_random_string(40)
 
@@ -339,7 +352,7 @@ def handle_user_upload(imageData):
 
         message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username}">'
     
-    add_message(username, message, date)
+    add_message(username, message, date, colour)
     send({'username': username, 'message': message, 'date': date}, broadcast=True)
 
 @socketio.on('message')
@@ -349,6 +362,7 @@ def handle_message(message_data):
     message = message_data['message']
     UUID = message_data['UUID']
     date = epoch_to_dd_mm_yyyy()
+    colour = message_data['colour']
     trimmedMessage = message.split()
 
     #Validating UUID because someone could fake their username
@@ -381,17 +395,17 @@ def handle_message(message_data):
                 if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
                     # If it's an image URL, render it as an image
                     message = f'<img src="{message}" alt="{username} style="width=80%; height=80%"/>'
-                    send({'username': username, 'message': message, 'date': date}, broadcast=True)
-                    add_message(username, message, date)
+                    send({'username': username, 'message': message, 'date': date, "colour": colour}, broadcast=True)
+                    add_message(username, message, date, colour)
                 elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
                     #Same with a video URL
                     message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
-                    send({'username': username, 'message': message, 'date': date}, broadcast=True)
+                    send({'username': username, 'message': message, 'date': date, "colour": colour}, broadcast=True)
                 else:
                     escaped_message = html.escape(message)
-                    add_message(username, escaped_message, date)
+                    add_message(username, escaped_message, date, colour)
                     escaped_message = replace_colon_items(escaped_message)
-                    send({'username': username, 'message': escaped_message, 'date': date}, broadcast=True)
+                    send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, broadcast=True)
                     send_js("""notifyUser()""")
         else:
                 send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", 
@@ -428,7 +442,8 @@ def index():
                 Dmessage = Dmessage.decode()
                 Dmessage = replace_colon_items(Dmessage)
                 Ddate = message[2]
-                newMessageList.append((Dusername, Dmessage, Ddate))
+                Dcolour = message[3]
+                newMessageList.append((Dusername, Dmessage, Ddate, Dcolour))
             else:
                 print(messages)
 
@@ -474,7 +489,8 @@ def create_table_accounts():
                       username TEXT NOT NULL UNIQUE, 
                       password TEXT NOT NULL,
                       agreement TEXT NOT NULL,
-                      UUID TEXT NOT NULL)''')
+                      UUID TEXT NOT NULL,
+                      colour TEXT NOT NULL)''')
     conn.commit()
     conn.close()
  
@@ -510,11 +526,11 @@ def register(data):
         else:
             # Hashing password
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            cursor.execute("INSERT INTO users (username, password, agreement, UUID) VALUES (?, ?, ?, ?)", (username, hashed_password, agreement, UUID))
+            cursor.execute("INSERT INTO users (username, password, agreement, UUID, colour) VALUES (?, ?, ?, ?, ?)", (username, hashed_password, agreement, UUID, "--light-blue"))
             conn.commit()
             conn.close()
             emit('registration_response', {'message': 'Registration successful', 'colour': 'green'})
-            send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
+            send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
 
 @socketio.on('login')
 def login(data):
@@ -530,11 +546,13 @@ def login(data):
     agreed = cursor.fetchone()
     cursor.execute("SELECT UUID FROM users WHERE username=?", (username,))
     UUID=cursor.fetchone()
+    cursor.execute("SELECT colour FROM users WHERE username=?", (username,))
+    colour = cursor.fetchone()
     conn.close()
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         if agreed[0] == 'yes':
-            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
-            emit('login_response', {'message': 'Success!', 'colour': 'red'}) 
+            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("colour", "{colour}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+            emit('login_response', {'message': 'Success!', 'colour': 'green'}) 
         else:
            emit('login_response', {'message': 'Account has not agreed to privacy policy, please contact Admin or create new account', 'colour': 'red'}) 
     else:

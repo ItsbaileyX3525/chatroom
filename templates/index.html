@@ -18,7 +18,7 @@
         {% for message in messages %}
             <p class="chat-message">
                     <span class="date">{{ message[2] }}</span>
-                    <span class="username">{{ message[0] }}:</span>
+                    <span class="username" style="color: var({{ message[3] }})">{{ message[0] }}:</span>
                     <span class="message">{{ message[1]|safe }}</span>
             </p>
         {% endfor %}

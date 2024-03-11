@@ -10,8 +10,10 @@ const sendbutton = document.getElementById("sendButton")
 const setUsername = localStorage.getItem("username");
 const UUID = localStorage.getItem('UUID')
 const loggedin = localStorage.getItem('LoggedIn');
+const root = document.querySelector(':root');
 
 socket.on('message', function(data) {
+    var rootStyle = getComputedStyle(root);
     const messageElement = document.createElement("p");
     const UsernameDisplay = document.createElement("span");
     const UsernameMessage = document.createElement("span");
@@ -19,6 +21,7 @@ socket.on('message', function(data) {
     const chatBox = document.getElementById("chat-box");
     messageElement.classList.add("chat-message");
     UsernameDisplay.classList.add("username");
+    UsernameDisplay.style.color = rootStyle.getPropertyValue(data['colour']);
     UsernameDisplay.innerHTML = `${data['username']}: `;
     UsernameMessage.classList.add("message");
     UsernameMessage.innerHTML = data['message']
@@ -145,7 +148,7 @@ messageInput.addEventListener("keydown", function(e) {
             }
         }
         else if (message){
-        socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
+        socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour")});
         messageInput.value = "";}
 }});
 
@@ -167,7 +170,7 @@ sendbutton.addEventListener('click', function(e) {
         }
     }
     else if (message){
-    socket.emit('message', {'username': username, 'message': message, 'UUID': UUID});
+    socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour")});
     messageInput.value = "";}
 })
 socket.on('execute_js', function(jsCode) {
@@ -236,6 +239,6 @@ function playAudio(type,url=""){
     }
 }
 function changeFont(type){
-    const root = document.querySelector(':root');
+    
     root.style.setProperty('--font-family', type);
 }
