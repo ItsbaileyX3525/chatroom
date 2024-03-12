@@ -1,9 +1,6 @@
-#Hello future bailey, you'll need to save the user colour to the databse otherwise on reload it'll just display as blue again
-
-
 #import the required modules
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, send, emit
+from flask_socketio import SocketIO, send, emit, join_room, leave_room
 import sqlite3
 from cryptography.fernet import Fernet
 import bcrypt
@@ -71,7 +68,7 @@ def replace_colon_items(input_string, data_list=data_list):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-socketio = SocketIO(app, max_http_buffer_size=16 * 1024 * 1024)
+socketio = SocketIO(app, cors_allowed_origins="*", max_http_buffer_size=16 * 1024 * 1024)
 
 hardBannedNames = ['System', 'system', 'Admin', 'admin']
 
@@ -492,6 +489,10 @@ def connected(username):
     print(username)
     send_js(f'''showNotification("{username} has connected!")''')
 
+@socket.on('disconnect')
+def disconnected():
+    print("user left the server.")
+
 @socketio.on('register')
 def register(data):
     username = data['username']
@@ -541,12 +542,33 @@ def login(data):
     conn.close()
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         if agreed[0] == 'yes':
-            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("colour", "{colour}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
             emit('login_response', {'message': 'Success!', 'colour': 'green'}) 
         else:
            emit('login_response', {'message': 'Account has not agreed to privacy policy, please contact Admin or create new account', 'colour': 'red'}) 
     else:
         emit('login_response', {'message': 'Invalid username or password', 'colour': 'red'})
+
+
+#Playground for experiments
+
+@app.route("/test")
+def test():
+    return render_template('test.html')
+
+@socketio.on('join')
+def on_join(data):
+    username = data['username']
+    room = data['room']
+    join_room(room)
+    send(username + ' has entered the room.', to=room)
+
+@socketio.on('leave')
+def on_leave(data):
+    username = data['username']
+    room = data['room']
+    leave_room(room)
+    send(username + ' has left the room.', to=room)
 
 
 if __name__ == "__main__":
