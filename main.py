@@ -194,6 +194,7 @@ def banUser(username):
     cursor = conn.cursor()
     cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
     result = cursor.fetchone()
+    conn.close()
     with open('blacklistUUID.json', 'r') as file:
         data = json.load(file)
 
@@ -265,13 +266,6 @@ def play_sound(props={},*args):
         if re.match(r'(https?://.*\.(?:mp3|ogg))', args[0]):#
             send_js(f'''playAudio('custom', "{args[0]}")''')
 
-def change_colour(props={},*args):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT colour FROM users WHERE username = ?", (props["username"],))
-    result = cursor.fetchone()
-
-    conn.close()
 
 def destroy_all(props={},*args):
     if args[0] == "AdminKey":
@@ -293,7 +287,6 @@ cmds = {
     "/play": play_sound,
     "/destroyAll": destroy_all,
     "/ban": ban,
-    "/colour": change_colour,
     "/unban": unban
 }
     
@@ -370,7 +363,7 @@ def handle_message(message_data):
     cursor = conn.cursor()
     cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
     result = cursor.fetchone()
-
+    conn.close()
     #checking if user is banned
     with open('blacklistUUID.json', 'r') as file:
         UUIDCheck = json.load(file)
@@ -406,7 +399,6 @@ def handle_message(message_data):
                     add_message(username, escaped_message, date, colour)
                     escaped_message = replace_colon_items(escaped_message)
                     send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, broadcast=True)
-                    send_js("""notifyUser()""")
         else:
                 send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", 
                                     sid=request.sid)
@@ -489,8 +481,7 @@ def create_table_accounts():
                       username TEXT NOT NULL UNIQUE, 
                       password TEXT NOT NULL,
                       agreement TEXT NOT NULL,
-                      UUID TEXT NOT NULL,
-                      colour TEXT NOT NULL)''')
+                      UUID TEXT NOT NULL)''')
     conn.commit()
     conn.close()
  
@@ -526,11 +517,12 @@ def register(data):
         else:
             # Hashing password
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            cursor.execute("INSERT INTO users (username, password, agreement, UUID, colour) VALUES (?, ?, ?, ?, ?)", (username, hashed_password, agreement, UUID, "--light-blue"))
+            cursor.execute("INSERT INTO users (username, password, agreement, UUID) VALUES (?, ?, ?, ?)", (username, hashed_password, agreement, UUID))
             conn.commit()
-            conn.close()
+            
             emit('registration_response', {'message': 'Registration successful', 'colour': 'green'})
             send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
+    conn.close()
 
 @socketio.on('login')
 def login(data):
@@ -546,8 +538,6 @@ def login(data):
     agreed = cursor.fetchone()
     cursor.execute("SELECT UUID FROM users WHERE username=?", (username,))
     UUID=cursor.fetchone()
-    cursor.execute("SELECT colour FROM users WHERE username=?", (username,))
-    colour = cursor.fetchone()
     conn.close()
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         if agreed[0] == 'yes':

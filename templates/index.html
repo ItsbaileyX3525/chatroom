@@ -23,6 +23,46 @@
             </p>
         {% endfor %}
     </div>
+    <div class="container-update" id="containerUpdate">
+        <div class="update-container">
+
+            <h1>Update Log</h1>
+            <span id="closeUpdateLog"><p>X</p></span>
+            <div class="updates">
+                <h3>Update 2.5</h3>
+                <li>Added username colours.</li>
+                <li>Optimised the server script to run faster.</li>
+                <li>Fixed memory leaks caused by not closing a few databases when finished.</li>
+                <li>Created update log.</li>
+                <li>Created a <a target="_blank" href="https://www.buymeacoffee.com/ItsbaileyX3525">buy me a coffee page.</a></li>
+                <h3>Update 2.3</h3>
+                <li>Fixed bug to do with emojis</li>
+                <li>Revamped how the functions were called and executed, improving the efficiency of the server.</li>
+                <li>Removed the mobile styles and combined them with the desktop ones.</li>
+                <li>Introduced the function send_system_message which significantly improved server responsiveness</li>
+                <h3>Update 2.1</h3>
+                <li>Optimsed server by adding certain function to the client instead of running from the server.</li>
+                <li>Fixed /changePwd and /font not responding.</li>
+                <li>Removed over 200 duplicate emojis from the emoji list which makes the chatroom load faster.</li>
+                <li>Refactored the old code on the server</li>
+                <li>Improved the responsiveness of the mobile styling on the login page and chatroom</li>
+                <h3>Update 2.0</h3>
+                <li>Redesigned the entire chatroom css. (contributed by Ano)</li>
+                <li>Ban system has been added.</li>
+                <li>Added 404 page in case you get lost.</li>
+                <li>Improved the styling of the ban page.</li>
+                <li>Fixed some serious secuirty bugs.</li>
+                <li>Changed the site to a domain and enforced HTTPS.</li>
+                <li>Added chatroom version tracker.</li>
+                <li>Increased max data upload (image upload) to 16MB</li>
+                <h3>Update 1.1</h3>
+                <li>Fixed minor bugs related to the functions.</li>
+                <h3>Update 1.0</h3>
+                <li>Made the login page more modern.</li>
+                <li>rewrote most of the code to be more readable/efficient.</li>            
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div class="file-upload-container">
             <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
@@ -37,5 +77,6 @@
     <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="../static/index.js"></script>
+    <!--<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ItsbaileyX3525" data-color="#FF5F5F" data-emoji="☕"  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>-->
 </body>
 </html>

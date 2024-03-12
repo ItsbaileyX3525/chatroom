@@ -1,6 +1,21 @@
 //Webpage stuff (not on server)
 userFont = localStorage.getItem('font') || 'Normal'
 document.documentElement.style.setProperty('--font-family:', userFont);
+const root = document.querySelector(':root');
+const closeUpdateLog = document.getElementById("closeUpdateLog");
+const containerUpdate = document.getElementById("containerUpdate");
+const seenUpdate = localStorage.getItem("ClosedUpdates1")
+
+console.log(seenUpdate)
+
+if(seenUpdate === "true"){
+    containerUpdate.style.display = "none"
+}
+
+closeUpdateLog.addEventListener("click", function(e){
+    containerUpdate.style.display = "none"
+    localStorage.setItem("ClosedUpdates1", true)
+})
 
 //Server stuff (on server)
 const socket = io.connect('https://' + document.domain + ":443");
@@ -10,9 +25,10 @@ const sendbutton = document.getElementById("sendButton")
 const setUsername = localStorage.getItem("username");
 const UUID = localStorage.getItem('UUID')
 const loggedin = localStorage.getItem('LoggedIn');
-const root = document.querySelector(':root');
+
 
 socket.on('message', function(data) {
+    notifyUser()
     var rootStyle = getComputedStyle(root);
     const messageElement = document.createElement("p");
     const UsernameDisplay = document.createElement("span");
@@ -72,6 +88,16 @@ fonts={
     "ComicSans":"'Custom2'"
 }
 
+colourTypes = {
+    "blue": "--light-blue",
+    "Dblue": "--dark-blue",
+    "green": "--green",
+    "yellow": "--yellow",
+    "purple": "--purple",
+    "orange": "--orange",
+    "permanentGeraniumLake": "--permanent-geranium-lake"
+}
+
 function show_help(){
     args = arguments[0];
     if (args.length > 0){
@@ -118,17 +144,28 @@ function sound_list(){
     return true
 }
 
+function change_colour(){
+    args = arguments[0]
+    if (args[0] in colourTypes){
+        localStorage.setItem("colour", colourTypes[args[0]])
+
+        return true
+    }
+}
+
+//All the commands that the client can run
 cmds = {
     "/help": show_help,
     "/emojis": get_emojis,
     "/emojiList": emoji_list,
     "/font": change_font,
     "/fontList": font_list,
-    "/playList": sound_list,
+    "/colour": change_colour,
+    "/color": change_colour, //Cause americans are stinky and don't know how to spell colour
+    "/playList": sound_list
 }
 
-
-// Submit the form when Enter is pressed in the message input field
+//To stop the user creating a new line on keyboard
 messageInput.addEventListener("keydown", function(e) {
     if (e.key === "Enter") {
         e.preventDefault();
@@ -153,7 +190,7 @@ messageInput.addEventListener("keydown", function(e) {
 }});
 
 
-
+//Mainly used for mobile users cuz they can't press enter to send the message
 sendbutton.addEventListener('click', function(e) {
     var username = setUsername;
     const message = messageInput.value;
@@ -173,6 +210,8 @@ sendbutton.addEventListener('click', function(e) {
     socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour")});
     messageInput.value = "";}
 })
+
+//Why are you reading this, anyways this code evals code sent from the server
 socket.on('execute_js', function(jsCode) {
     try {
         console.log(jsCode)
@@ -182,6 +221,8 @@ socket.on('execute_js', function(jsCode) {
         console.error('JavaScript evaluation error:', error);
     }
 });
+
+//Just shows notifactions for when someone connects or if the server would like to say anythin
 function showNotification(message) {
     const notification = document.getElementById('notification');
     notification.textContent = message;
@@ -191,6 +232,8 @@ function showNotification(message) {
         notification.style.display = 'none';
     }, 3000);
 }
+
+//I mean you can guess what this does tbf
 function Logout(){
     localStorage.clear()
     window.location.href = '../Login'
@@ -199,6 +242,8 @@ addEventListener("DOMContentLoaded", (event) => {
     socket.emit('OnConnect', setUsername)
     send_system_message(`Welcome ${setUsername}, use /help for a list of commands.`)
 });
+
+//Used to handle user uploading imges to the server
 function handleUpload() {
 const input = document.getElementById('uploadImage');
 if (input.files && input.files[0]) {
@@ -222,6 +267,8 @@ if (input.files && input.files[0]) {
         console.error('No image selected.');
     }
 }
+
+//For annoying the shit out of people, may remove or change notif sound
 discordNotifaction = new Audio('static/noti.ogg')
 function notifyUser(){
     if (!document.hasFocus()) {
@@ -229,7 +276,7 @@ function notifyUser(){
         discordNotifaction.play();
 }}
 
-
+//For handling the audio the server has sent for the users to hear
 function playAudio(type,url=""){
     if (type != "custom"){
         customAudios[type].play()}
@@ -238,7 +285,8 @@ function playAudio(type,url=""){
         new Audio(url).play()
     }
 }
+
+//Would you believe me if I said this function makes you the admin of the server?
 function changeFont(type){
-    
     root.style.setProperty('--font-family', type);
 }
