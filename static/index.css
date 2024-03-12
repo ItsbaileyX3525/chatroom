@@ -325,6 +325,62 @@ Mobile
 */
 
 @media (orientation: portrait) {
+    .container-update{
+        background-color: rgb(25, 28, 31);
+        border-radius: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+        position: absolute;
+        overflow: auto;
+        word-wrap: break-word;
+        width: 80%;
+        color: white;
+        height: 90%;
+        left: 10%;
+        z-index: 25;
+    }
+    .update-container h1{
+        display: flex;
+        position: absolute;
+        left:10%;
+    }
+    @media only screen and (max-width: 450px) { 
+        body{
+            margin: 0 3%;
+            font-size: 1.3rem;
+        }
+        #chat-box{
+            height: 75vh;
+            margin-top: calc(1.3rem + 5%);
+        }
+        .chat-message .date{
+            font-size: 50%;
+            top: 3%;
+            right: 1.5%;
+        }
+        .container {
+            margin: 5% 0;
+        }
+        .file-upload-container {
+            order: 1;
+        }
+        .send-button-container {
+            order: 2;
+        }
+        .input-field {
+            width: 75%;
+        }
+        .chatroom-version{
+            left: 3%;
+            bottom: 0%;
+        }
+        .logout-button{
+            right: 3%;
+            bottom: 14%;
+            padding: 1% 2%;
+        }      
+    }
+    @media only screen and (min-width: 450px) { 
+        
     body{
         margin: 0 3%;
         font-size: 1.3rem;
@@ -358,5 +414,5 @@ Mobile
         right: 3%;
         bottom: 2%;
         padding: 1% 2%;
-    }
+    }}
 }
