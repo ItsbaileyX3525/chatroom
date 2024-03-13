@@ -95,7 +95,9 @@ def send_js(js_code, room=None, sid=None, isGlobal=False):
     if isGlobal:
         emit('execute_js', js_code, broadcast=True)
     elif room!=None:
-        emit('execute_js', js_code, to=room)
+        print("Sent js to certain room")
+        print(room)
+        emit('execute_js', js_code, to=str(room))
     elif sid!=None:
         emit('execute_js', js_code, room=sid)
     else:
@@ -242,36 +244,39 @@ def send_system_message(message, sid):
         chatBox.appendChild(messageElement);''', sid=sid)
 
 
-def change_pwd(props={},*args):
+def change_pwd(props={},room=1,*args):
     success = change_password(props["username"],args[0])
     if success:
         send_system_message(f'Successfully changed password to {args[0]}' if success else f'Failed to change the password to {args[0]}', sid=request.sid)
 
-def wipe(props={},*args):
+def wipe(props={},room=1,*args):
     if args[0] == 'AdminKey':
         clear_messages()        
     else:
         send_system_message("Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key", sid=request.sid)
 
-def play_sound(props={},*args, room):
+def play_sound(props={},room=1,*args):
+    print("play sound args:",args[0])
+    print("Play sound code:",room)
     if args[0] in sounds:
-        send_js(f"""playAudio({sounds[args[0]]})""",room=room)
+        print("Played sound")
+        send_js(f"""playAudio({sounds[args[0]]})""", room)
     else:
         if re.match(r'(https?://.*\.(?:mp3|ogg))', args[0]):#
-            send_js(f'''playAudio('custom', "{args[0]}")''')
+            send_js(f'''playAudio('custom', "{args[0]}")''',room)
 
 
-def destroy_all(props={},*args):
+def destroy_all(props={},room=1,*args):
     if args[0] == "AdminKey":
         wipeEverything()
     else:
         send_system_message("Sorry but that key just isn't right", sid=request.sid)
 
-def ban(props={},*args):
+def ban(props={},room=1,*args):
     if args[0] == 'AdminKey':
         banUser(args[1])
         
-def unban(props={},*args):
+def unban(props={},room=1,*args):
     if args[0] == 'AdminKey':
         unbanUser(args[1])
 
@@ -286,11 +291,12 @@ cmds = {
     
 
 def handleCommands(args,username, room):
+    print("Handle number: ",room)
     cmd_name = args.pop(0)
     if cmd_name in cmds:
         f = cmds[cmd_name]
         props = {"username":username}
-        f(props, *args, room)
+        f(props, room, *args)
     else:
         send_system_message("Sorry I don't believe that is a command, perhaps check your spelling?", sid=request.sid)
 
@@ -348,10 +354,12 @@ def handle_message(message_data):
     lowerUser = username.lower()
     message = message_data['message']
     UUID = message_data['UUID']
-    room = message_data['roomNumber']
+    roomNumber = message_data['roomNumber']
     date = epoch_to_dd_mm_yyyy()
     colour = message_data['colour']
     trimmedMessage = message.split()
+
+    
 
     #Validating UUID because someone could fake their username
     conn = sqlite3.connect('users.db')
@@ -377,28 +385,28 @@ def handle_message(message_data):
                 send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
             elif trimmedMessage[0].startswith("/"):
                 message = message.split()
-                handleCommands(message,username,room)
+                print("Your room number is: ", roomNumber)
+                handleCommands(message,username,room=roomNumber)
             
             else:
-                print(room)
                 if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
                     # If it's an image URL, render it as an image
                     message = f'<img src="{message}" alt="{username} style="width=80%; height=80%"/>'
-                    send({'username': username, 'message': message, 'date': date, "colour": colour}, to=room)
-                    if room == 1:
+                    send({'username': username, 'message': message, 'date': date, "colour": colour}, to=roomNumber)
+                    if roomNumber == "1":
                         print("Added message to public")
                         add_message(username, message, date, colour)
                 elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
                     #Same with a video URL
                     pass
                     #message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
-                    #send({'username': username, 'message': message, 'date': date, "colour": colour}, to=room)
+                    #send({'username': username, 'message': message, 'date': date, "colour": colour}, to=roomNumber)
                 else:
                     escaped_message = html.escape(message)
-                    if room == 1:
+                    if roomNumber == "1":
                         add_message(username, escaped_message, date, colour)
                     escaped_message = replace_colon_items(escaped_message)
-                    send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=room)
+                    send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=roomNumber)
         else:
                 send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", 
                                     sid=request.sid)
@@ -417,7 +425,7 @@ def user_on_mobile() -> bool:
     return False
 
 @app.route("/")
-def index(data):
+def index():
     newMessageList = [] 
     messages = get_messages()
     f = open('chatroomVersion.txt')
@@ -451,13 +459,11 @@ def index(data):
             ipFound = True
             break
 
-    #Need a way to pass roomNumber into this variable
-    roomNumber = data['roomNumber']
 
     if ipFound:
         return render_template("UhOhYoureBanned.html")
     else:
-        return render_template("index.html", messages=newMessageList, version=version, roomNumber=roomNumber)
+        return render_template("index.html", messages=newMessageList, version=version)
 
 
 @app.route("/Login")
@@ -491,23 +497,30 @@ def create_table_accounts():
 create_table_accounts()
 
 @socketio.on('OnConnect')
-def connected(username):
-    print(username)
-    send_js(f'''showNotification("{username} has connected!")''')
+def connected(username,room):
+    send_js(f'''showNotification("{username} has connected!")''', room=room)
 
 @socketio.on('disconnect')
 def disconnected():
+    #:(
     print("user left the server.")
 
 @socketio.on('register')
 def register(data):
-    username = data['username']
-    password = data['password']
-    agreement = data['agreed']
-    UUID = data['UUID']
+    username = data["username"]
+    password = data["password"]
+    agreement = data["agreed"]
+    UUID = data["UUID"]
+    roomNumber = data["roomNumber"]
+    print("Room number is: ", roomNumber)
     Dusername = username.lower()
     Dusername = Dusername.strip()
     Dpassword = bool(re.search(r"\s", password))
+
+    if not roomNumber in knownChatrooms:
+        emit('registration_response', {'message': 'Invalid room code!', 'colour': 'red'})
+        return
+
 
     if Dpassword:
         emit('registration_response', {'message': 'Password can not contain spaces', 'colour': 'red'})
@@ -525,16 +538,34 @@ def register(data):
             # Hashing password
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             cursor.execute("INSERT INTO users (username, password, agreement, UUID) VALUES (?, ?, ?, ?)", (username, hashed_password, agreement, UUID))
-            conn.commit()
-            
+            conn.commit() 
             emit('registration_response', {'message': 'Registration successful', 'colour': 'green'})
-            send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
+            if roomNumber == 1:
+                send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
+            else:
+                send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../customRoom"''', sid=request.sid)
     conn.close()
 
 @socketio.on('login')
 def login(data):
     username = data['username']
     password = data['password']
+    roomNumber = data["roomNumber"]
+    createRoom = data["createRoom"]
+    if createRoom == "true":
+        knownChatrooms.append(roomNumber)
+    else:
+        if roomNumber in knownChatrooms:
+            print(roomNumber)
+            print(knownChatrooms)
+            print("Room able to join")
+        else:
+            print(roomNumber)
+            print(knownChatrooms)
+            print("Room doesn't exist!")
+            emit('login_response', {'message': 'Invalid room code!', 'colour': 'red'})
+            return
+
 
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -548,7 +579,10 @@ def login(data):
     conn.close()
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         if agreed[0] == 'yes':
-            send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+            if roomNumber == 1:
+                send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
+            else:
+                send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../customRoom"''', sid=request.sid)
             emit('login_response', {'message': 'Success!', 'colour': 'green'}) 
         else:
            emit('login_response', {'message': 'Account has not agreed to privacy policy, please contact Admin or create new account', 'colour': 'red'}) 
@@ -558,15 +592,20 @@ def login(data):
 
 #Playground for experiments
 
-@app.route("/joinRoom")
+knownChatrooms = ["1",]
+
+@app.route("/customRoom")
 def rooms():
-    return render_template("joinRoom.html")
+    return render_template("customRoom.html", knownChatrooms=knownChatrooms)
 
 @socketio.on('join')
 def on_join(data):
     room = data['room']
     join_room(room)
-    send_js("""console.log("Your in a custom room!")""", room)
+    if room == 1:
+        send_js("""console.log("Your in the public room!")""", room)
+    else:
+        send_js(f"""console.log("Your in a custom room! roomCode: {room}")""", room)
 
 @socketio.on('leave')
 def on_leave(data):

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+        <title>Bailey's chatroom</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" href="static/index.css">
+        <meta id="roomCodePlaceholder" aria-atomic="{{ knownChatrooms }}">
+        <meta property="og:title" content="Bailey's chatroom">
+        <meta property="og:description" content="Welcome to the chatroom of Bailey, talk discuss and do whatever!">
+        <meta property="og:image" content="https://i.ibb.co/rpgNnkK/image.png">
+</head>
+<body>
+    <div id="notification">This is a custom notification!</div>
+    <div id="chat-box">     
+
+    </div>
+    <div class="container">
+        <div class="file-upload-container">
+            <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
+            <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();"></input>
+        </div>
+        <textarea id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>
+        <div class="send-button-container">
+            <button id="sendButton" class="send-button">&#10148;</button>
+        </div>
+    </div>
+    <div class="chatroom-version">Chatroom version: Custom</div>
+    <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="../static/customRoom.js"></script>
+    <!--<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ItsbaileyX3525" data-color="#FF5F5F" data-emoji="☕"  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>-->
+</body>
+</html>

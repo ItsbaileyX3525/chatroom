@@ -4,16 +4,7 @@ document.documentElement.style.setProperty('--font-family:', userFont);
 const root = document.querySelector(':root');
 const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
-const seenUpdate = localStorage.getItem("ClosedUpdates1")
-
-if(seenUpdate === "true"){
-    containerUpdate.style.display = "none"
-}
-
-closeUpdateLog.addEventListener("click", function(e){
-    containerUpdate.style.display = "none"
-    localStorage.setItem("ClosedUpdates1", true)
-})
+const validRooms = document.getElementById("roomCodePlaceholder").ariaAtomic;
 
 //Server stuff (on server)
 const socket = io.connect('https://' + document.domain + ":443");
@@ -24,8 +15,12 @@ const setUsername = localStorage.getItem("username");
 const UUID = localStorage.getItem("UUID")
 const loggedin = localStorage.getItem("LoggedIn");
 const roomCode = localStorage.getItem("roomNumber")
-if (roomCode != 1){
-    window.location.href="../customRoom"
+if (roomCode === "1"){
+    window.location.href="../"
+}
+if (!validRooms.includes(roomCode)){
+    localStorage.setItem("roomNumber", 1)
+    window.location.href="../"
 }
 socket.emit('join', {"room": roomCode});
 
@@ -187,6 +182,7 @@ messageInput.addEventListener("keydown", function(e) {
             }
         }
         else if (message){
+            console.log(roomCode)
         socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
         messageInput.value = "";}
 }});
@@ -209,6 +205,7 @@ sendbutton.addEventListener('click', function(e) {
         }
     }
     else if (message){
+        console.log(roomCode)
     socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
     messageInput.value = "";}
 })
@@ -216,7 +213,6 @@ sendbutton.addEventListener('click', function(e) {
 //Why are you reading this, anyways this code evals code sent from the server
 socket.on('execute_js', function(jsCode) {
     try {
-        console.log(jsCode)
         eval(jsCode)
         chatBox.scrollTop = chatBox.scrollHeight;
     } catch (error) {
@@ -242,7 +238,7 @@ function Logout(){
 }
 addEventListener("DOMContentLoaded", (event) => {
     socket.emit('OnConnect', setUsername, roomCode)
-    send_system_message(`Welcome ${setUsername}, use /help for a list of commands.`)
+    send_system_message(`Welcome ${setUsername}, use /help for a list of commands. This rooms code is: ` + roomCode)
 });
 
 //Used to handle user uploading imges to the server

@@ -15,7 +15,6 @@
 <body>
     <div id="notification">This is a custom notification!</div>
     <div id="chat-box">
-        {% if room == 1 %}
         {% for message in messages %}
             <p class="chat-message">
                     <span class="date">{{ message[2] }}</span>
@@ -23,13 +22,7 @@
                     <span class="message">{{ message[1]|safe }}</span>
             </p>
         {% endfor %}        
-    {% else %}
-    <p class="chat-message">
-        <span class="date"></span>
-        <span class="username"></span>
-        <span class="message"></span>
-    </p>
-    {% endif %}
+
 
     </div>
     <div class="container-update" id="containerUpdate">
@@ -38,6 +31,10 @@
             <h1>Update Log</h1>
             <span id="closeUpdateLog"><p>X</p></span>
             <div class="updates">
+                <h3>Update 3.0</h3>
+                <li>Added custom chatrooms.</li>
+                <li>Made mobile styles more consistant.</li>
+                <li>Fixed rare bug that would cause mobile login/signup to break.</li>
                 <h3>Update 2.6</h3>
                 <li>Fixed chatroom styling wrong on smaller screens.</li>
                 <li>Updated styling for update log on mobile.</li>
