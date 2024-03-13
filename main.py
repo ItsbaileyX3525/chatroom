@@ -91,8 +91,10 @@ def get_messages():
     return messages
 
 @socketio.on('send_js_code')
-def send_js(js_code, sid=None):
-    if sid != None:
+def send_js(js_code, room, sid=None, ):
+    if room:
+        emit('execute_js', js_code, to=room)
+    elif sid != None:
         emit('execute_js', js_code, room=sid)
     else:
         emit('execute_js', js_code, broadcast=True)
@@ -489,7 +491,7 @@ def connected(username):
     print(username)
     send_js(f'''showNotification("{username} has connected!")''')
 
-@socket.on('disconnect')
+@socketio.on('disconnect')
 def disconnected():
     print("user left the server.")
 
@@ -552,9 +554,13 @@ def login(data):
 
 #Playground for experiments
 
-@app.route("/test")
-def test():
-    return render_template('test.html')
+@app.route("/joinRoom")
+def rooms():
+    return render_template("joinRoom.html")
+
+@app.route("/Room.html")
+def room():
+    return render_template("room.html")
 
 @socketio.on('join')
 def on_join(data):
@@ -562,6 +568,7 @@ def on_join(data):
     room = data['room']
     join_room(room)
     send(username + ' has entered the room.', to=room)
+    send_js("""console.log("Your in a custom room!")""", room)
 
 @socketio.on('leave')
 def on_leave(data):

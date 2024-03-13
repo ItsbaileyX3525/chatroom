@@ -1,6 +1,7 @@
 const container = document.getElementById('container');
 const registerBtn = document.getElementById('register');
 const loginBtn = document.getElementById('login');
+const roomNumber = document.getElementById("room")
 
 function uuidv4() {
     return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
@@ -19,8 +20,9 @@ document.getElementById('registrationForm').onsubmit = function(event) {
     event.preventDefault();
     var username = document.getElementById('regUsername').value;
     var password = document.getElementById('regPassword').value;
-    socket.emit('register', { username: username, password: password, agreed: "yes", UUID: uuidv4() });
-
+    if (!roomNumber){
+        socket.emit('register', { username: username, password: password, agreed: "yes", UUID: uuidv4() });
+    }
 }
 
 document.getElementById('loginForm').onsubmit = function(event) {
