@@ -6,8 +6,6 @@ const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
 const seenUpdate = localStorage.getItem("ClosedUpdates1")
 
-console.log(seenUpdate)
-
 if(seenUpdate === "true"){
     containerUpdate.style.display = "none"
 }
@@ -20,12 +18,13 @@ closeUpdateLog.addEventListener("click", function(e){
 //Server stuff (on server)
 const socket = io.connect('https://' + document.domain + ":443");
 const chatBox = document.getElementById("chat-box");
-const messageInput = document.getElementById('messageInput')
+const messageInput = document.getElementById("messageInput")
 const sendbutton = document.getElementById("sendButton")
 const setUsername = localStorage.getItem("username");
-const UUID = localStorage.getItem('UUID')
-const loggedin = localStorage.getItem('LoggedIn');
-
+const UUID = localStorage.getItem("UUID")
+const loggedin = localStorage.getItem("LoggedIn");
+const roomCode = localStorage.getItem("roomNumber")
+socket.emit('join', {"room": roomCode});
 
 socket.on('message', function(data) {
     notifyUser()
@@ -185,7 +184,7 @@ messageInput.addEventListener("keydown", function(e) {
             }
         }
         else if (message){
-        socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour")});
+        socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
         messageInput.value = "";}
 }});
 
@@ -207,7 +206,7 @@ sendbutton.addEventListener('click', function(e) {
         }
     }
     else if (message){
-    socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour")});
+    socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
     messageInput.value = "";}
 })
 

@@ -91,13 +91,16 @@ def get_messages():
     return messages
 
 @socketio.on('send_js_code')
-def send_js(js_code, room, sid=None, ):
-    if room:
+def send_js(js_code, room=None, sid=None, isGlobal=False):
+    if isGlobal:
+        emit('execute_js', js_code, broadcast=True)
+    elif room!=None:
         emit('execute_js', js_code, to=room)
-    elif sid != None:
+    elif sid!=None:
         emit('execute_js', js_code, room=sid)
     else:
-        emit('execute_js', js_code, broadcast=True)
+        print("unable to send js anywhere, code: ", js_code)
+
 
 def get_password(username):
     conn = sqlite3.connect('users.db')
@@ -129,7 +132,7 @@ def clear_messages():
     cursor.execute("DELETE FROM messages")
     conn.commit()
     conn.close()
-    send_js("""const chatBox = document.getElementById('chat-box');chatBox.innerHTML = ''""")
+    send_js("""const chatBox = document.getElementById('chat-box');chatBox.innerHTML = ''""",isGlobal=True)
     send({'username': 'System', 'message': 'Admin wiped the message database! (refresh to remove this message)', 'date': epoch_to_dd_mm_yyyy(), 'isCustom': "no"}, broadcast=True)
 
 #Wipe all the databases (messasges and users)
@@ -152,7 +155,7 @@ def wipeEverything():
     send_js('''setTimeout(function(){
             Logout()
     }, 5000);showNotification("Admin wiped everything, signing out in 3 seconds")
-           ''')
+           ''',isGlobal=True)
 
 
 # Function to add a new message to the database
@@ -223,13 +226,6 @@ sounds={
     "pluh":'"pluh"',
     "gay":'"gay"'
 }
-fonts={
-    "Helvetica":"'Custom1'",
-    "Normal":"'Normal'",
-    "RobotoMono":"'Custom3'",
-    "SourceCodePro":"'Custom4'",
-    "ComicSans":"'Custom2'"
-}
 
 def send_system_message(message, sid):
     send_js(f'''const chatBox = document.getElementById("chat-box");
@@ -246,7 +242,6 @@ def send_system_message(message, sid):
         chatBox.appendChild(messageElement);''', sid=sid)
 
 
-#Currently does not work (too tired too fix atm)
 def change_pwd(props={},*args):
     success = change_password(props["username"],args[0])
     if success:
@@ -258,9 +253,9 @@ def wipe(props={},*args):
     else:
         send_system_message("Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key", sid=request.sid)
 
-def play_sound(props={},*args):
+def play_sound(props={},*args, room):
     if args[0] in sounds:
-        send_js(f"""playAudio({sounds[args[0]]})""")
+        send_js(f"""playAudio({sounds[args[0]]})""",room=room)
     else:
         if re.match(r'(https?://.*\.(?:mp3|ogg))', args[0]):#
             send_js(f'''playAudio('custom', "{args[0]}")''')
@@ -290,12 +285,12 @@ cmds = {
 }
     
 
-def handleCommands(args,username):
+def handleCommands(args,username, room):
     cmd_name = args.pop(0)
     if cmd_name in cmds:
         f = cmds[cmd_name]
         props = {"username":username}
-        f(props, *args)
+        f(props, *args, room)
     else:
         send_system_message("Sorry I don't believe that is a command, perhaps check your spelling?", sid=request.sid)
 
@@ -353,6 +348,7 @@ def handle_message(message_data):
     lowerUser = username.lower()
     message = message_data['message']
     UUID = message_data['UUID']
+    room = message_data['roomNumber']
     date = epoch_to_dd_mm_yyyy()
     colour = message_data['colour']
     trimmedMessage = message.split()
@@ -381,23 +377,28 @@ def handle_message(message_data):
                 send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
             elif trimmedMessage[0].startswith("/"):
                 message = message.split()
-                handleCommands(message,username)
-
+                handleCommands(message,username,room)
+            
             else:
+                print(room)
                 if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
                     # If it's an image URL, render it as an image
                     message = f'<img src="{message}" alt="{username} style="width=80%; height=80%"/>'
-                    send({'username': username, 'message': message, 'date': date, "colour": colour}, broadcast=True)
-                    add_message(username, message, date, colour)
+                    send({'username': username, 'message': message, 'date': date, "colour": colour}, to=room)
+                    if room == 1:
+                        print("Added message to public")
+                        add_message(username, message, date, colour)
                 elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
                     #Same with a video URL
-                    message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
-                    send({'username': username, 'message': message, 'date': date, "colour": colour}, broadcast=True)
+                    pass
+                    #message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
+                    #send({'username': username, 'message': message, 'date': date, "colour": colour}, to=room)
                 else:
                     escaped_message = html.escape(message)
-                    add_message(username, escaped_message, date, colour)
+                    if room == 1:
+                        add_message(username, escaped_message, date, colour)
                     escaped_message = replace_colon_items(escaped_message)
-                    send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, broadcast=True)
+                    send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=room)
         else:
                 send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", 
                                     sid=request.sid)
@@ -416,7 +417,7 @@ def user_on_mobile() -> bool:
     return False
 
 @app.route("/")
-def index():
+def index(data):
     newMessageList = [] 
     messages = get_messages()
     f = open('chatroomVersion.txt')
@@ -450,10 +451,13 @@ def index():
             ipFound = True
             break
 
+    #Need a way to pass roomNumber into this variable
+    roomNumber = data['roomNumber']
+
     if ipFound:
         return render_template("UhOhYoureBanned.html")
     else:
-        return render_template("index.html", messages=newMessageList, version=version)
+        return render_template("index.html", messages=newMessageList, version=version, roomNumber=roomNumber)
 
 
 @app.route("/Login")
@@ -558,24 +562,16 @@ def login(data):
 def rooms():
     return render_template("joinRoom.html")
 
-@app.route("/Room.html")
-def room():
-    return render_template("room.html")
-
 @socketio.on('join')
 def on_join(data):
-    username = data['username']
     room = data['room']
     join_room(room)
-    send(username + ' has entered the room.', to=room)
     send_js("""console.log("Your in a custom room!")""", room)
 
 @socketio.on('leave')
 def on_leave(data):
-    username = data['username']
     room = data['room']
     leave_room(room)
-    send(username + ' has left the room.', to=room)
 
 
 if __name__ == "__main__":

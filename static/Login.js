@@ -1,3 +1,4 @@
+const socket = io.connect('https://' + document.domain + ":443");
 const container = document.getElementById('container');
 const registerBtn = document.getElementById('register');
 const loginBtn = document.getElementById('login');
@@ -20,20 +21,27 @@ document.getElementById('registrationForm').onsubmit = function(event) {
     event.preventDefault();
     var username = document.getElementById('regUsername').value;
     var password = document.getElementById('regPassword').value;
-    if (!roomNumber){
-        socket.emit('register', { username: username, password: password, agreed: "yes", UUID: uuidv4() });
+    var room = document.getElementById("room1");
+    if (!room.value){
+        room.value = 1
     }
+    localStorage.setItem("roomNumber", room.value);
+    socket.emit('register', { username: username, password: password, agreed: "yes", UUID: uuidv4() });
 }
 
 document.getElementById('loginForm').onsubmit = function(event) {
     event.preventDefault();
     var username = document.getElementById('loginUsername').value;
     var password = document.getElementById('loginPassword').value;
+    var room = document.getElementById("room2");
+    if (!room.value){
+        room.value = 1
+    }
+    localStorage.setItem("roomNumber", room.value);
     socket.emit('login', { username: username, password: password });
 
 };
 
-const socket = io.connect('https://' + document.domain + ":443");
 
 socket.on('registration_response', function(data) {
     const messageReg = document.getElementById('messageReg')
