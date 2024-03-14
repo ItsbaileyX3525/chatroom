@@ -217,7 +217,7 @@ def banUser(username):
 
     with open('blacklist.json', 'w') as file:
         json.dump(data, file)
-    send_js(f'''location.reload();''', sid=request.sid)
+
 
 sounds={
     "hellNaw":'"hellNaw"',
@@ -367,6 +367,7 @@ def handle_message(message_data):
     cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
     result = cursor.fetchone()
     conn.close()
+
     #checking if user is banned
     with open('blacklistUUID.json', 'r') as file:
         UUIDCheck = json.load(file)
@@ -374,6 +375,8 @@ def handle_message(message_data):
     if UUID in UUIDCheck:
         send_system_message("You are banned ;P, and now we are going to reban this new IP ;) ", sid=request.sid)
         banUser(username)
+        print("rebanned")
+        send_js('''location.reload()''',sid=request.sid)
         
         return
 
@@ -512,7 +515,7 @@ def register(data):
     agreement = data["agreed"]
     UUID = data["UUID"]
     roomNumber = data["roomNumber"]
-    print("Room number is: ", roomNumber)
+    knownChatrooms = fetchKnownChatrooms()
     Dusername = username.lower()
     Dusername = Dusername.strip()
     Dpassword = bool(re.search(r"\s", password))
@@ -552,16 +555,14 @@ def login(data):
     password = data['password']
     roomNumber = data["roomNumber"]
     createRoom = data["createRoom"]
+    knownChatrooms = fetchKnownChatrooms()
     if createRoom == "true":
-        knownChatrooms.append(roomNumber)
+        writeToKnownChatrooms(roomNumber)
     else:
         if roomNumber in knownChatrooms:
-            print(roomNumber)
-            print(knownChatrooms)
+
             print("Room able to join")
         else:
-            print(roomNumber)
-            print(knownChatrooms)
             print("Room doesn't exist!")
             emit('login_response', {'message': 'Invalid room code!', 'colour': 'red'})
             return
@@ -592,10 +593,26 @@ def login(data):
 
 #Playground for experiments
 
-knownChatrooms = ["1",]
+def fetchKnownChatrooms():
+    f=open("knownChatrooms.txt", "r")
+    knownChatrooms = f.read()
+    f.close()
+    return knownChatrooms
+
+def writeToKnownChatrooms(towrite):
+    f =open("knownChatrooms.txt","r")
+    knownChatrooms = list(f.read())
+    f.close()
+
+    f=open("knownChatrooms.txt","w")
+    print(f"The list is: {knownChatrooms}")
+    knownChatrooms.append(towrite)
+    f.write(knownChatrooms)
+    f.close()
 
 @app.route("/customRoom")
 def rooms():
+    knownChatrooms = fetchKnownChatrooms()
     return render_template("customRoom.html", knownChatrooms=knownChatrooms)
 
 @socketio.on('join')
