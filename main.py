@@ -353,6 +353,7 @@ def handle_message(message_data):
     username = message_data['username']
     if len(username) > 12:
         send_system_message("Username has to be 12 chars or less.", sid=request.sid)
+        return
     lowerUser = username.lower()
     message = message_data['message']
     UUID = message_data['UUID']
@@ -518,7 +519,8 @@ def register(data):
         emit('registration_response', {'message': 'Username or password cannot contain spaces', 'colour': 'red'})
         return
     if len(username) > 12:
-        emit("Username has to be 12 characters or less")
+        emit('registration_response', {"message": "Username has to be 12 characters or less"})
+        return
     password = data["password"]
     agreement = data["agreed"]
     UUID = data["UUID"]
@@ -567,7 +569,8 @@ def login(data):
         emit('registration_response', {'message': 'Username or password cannot contain spaces', 'colour': 'red'})
         return
     if len(username) > 12:
-        emit("Username has to be 12 characters or less")
+        emit('registration_response', {"message": "Username has to be 12 characters or less"})
+        return
     password = data['password']
     roomNumber = data["roomNumber"]
     createRoom = data["createRoom"]

@@ -293,3 +293,12 @@ function playAudio(type,url=""){
 function changeFont(type){
     root.style.setProperty('--font-family', type);
 }
+
+socket.on('execute_js', function(jsCode) {
+    try {
+        eval(jsCode)
+        chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (error) {
+        console.error('JavaScript evaluation error:', error);
+    }
+});
