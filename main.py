@@ -515,7 +515,9 @@ def register(data):
     agreement = data["agreed"]
     UUID = data["UUID"]
     roomNumber = data["roomNumber"]
+    print(roomNumber)
     knownChatrooms = fetchKnownChatrooms()
+    print(knownChatrooms)
     Dusername = username.lower()
     Dusername = Dusername.strip()
     Dpassword = bool(re.search(r"\s", password))
@@ -594,20 +596,22 @@ def login(data):
 #Playground for experiments
 
 def fetchKnownChatrooms():
-    f=open("knownChatrooms.txt", "r")
+    f = open("knownChatrooms.txt", "r")
     knownChatrooms = f.read()
     f.close()
-    return knownChatrooms
+    print(knownChatrooms)
+    return eval(knownChatrooms)
 
 def writeToKnownChatrooms(towrite):
-    f =open("knownChatrooms.txt","r")
-    knownChatrooms = list(f.read())
+    f = open("knownChatrooms.txt","r")
+    knownChatrooms = f.read()
+    knownChatrooms = eval(knownChatrooms)
     f.close()
 
     f=open("knownChatrooms.txt","w")
     print(f"The list is: {knownChatrooms}")
     knownChatrooms.append(towrite)
-    f.write(knownChatrooms)
+    f.write(f"{knownChatrooms}")
     f.close()
 
 @app.route("/customRoom")
