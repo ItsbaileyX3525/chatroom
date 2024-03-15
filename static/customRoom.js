@@ -257,7 +257,7 @@ if (input.files && input.files[0]) {
 
     reader.onload = function (e) {
         const base64Image = e.target.result;
-        socket.emit("imageUpload", [base64Image, imageType, setUsername])
+        socket.emit("imageUpload", [base64Image, imageType, setUsername, localStorage.getItem("colour"), roomCode])
         };
 
         reader.readAsDataURL(input.files[0]);

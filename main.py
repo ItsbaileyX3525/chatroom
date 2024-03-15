@@ -303,9 +303,11 @@ def handleCommands(args,username, room):
 #Handle user image upload
 @socketio.on('imageUpload')
 def handle_user_upload(imageData):
+    print("Uploading image")
     imageType = imageData[1]
     username = imageData[2]
     colour = imageData[3]
+    room = imageData[4]
     date = epoch_to_dd_mm_yyyy()
     randomImageName = get_random_string(40)
 
@@ -345,8 +347,9 @@ def handle_user_upload(imageData):
 
         message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username}">'
     
-    add_message(username, message, date, colour)
-    send({'username': username, 'message': message, 'date': date}, broadcast=True)
+    if room == "1":
+        add_message(username, message, date, colour)
+    send({'username': username, 'message': message, 'date': date}, to=room)
 
 @socketio.on('message')
 def handle_message(message_data):

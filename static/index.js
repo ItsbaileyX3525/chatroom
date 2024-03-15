@@ -4,7 +4,7 @@ document.documentElement.style.setProperty('--font-family:', userFont);
 const root = document.querySelector(':root');
 const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
-const seenUpdate = localStorage.getItem("ClosedUpdates1")
+const seenUpdate = localStorage.getItem("ClosedUpdates3")
 
 if(seenUpdate === "true"){
     containerUpdate.style.display = "none"
@@ -12,7 +12,7 @@ if(seenUpdate === "true"){
 
 closeUpdateLog.addEventListener("click", function(e){
     containerUpdate.style.display = "none"
-    localStorage.setItem("ClosedUpdates1", true)
+    localStorage.setItem("ClosedUpdates3", true)
 })
 
 //Server stuff (on server)
@@ -273,7 +273,7 @@ if (input.files && input.files[0]) {
 
     reader.onload = function (e) {
         const base64Image = e.target.result;
-        socket.emit("imageUpload", [base64Image, imageType, setUsername])
+        socket.emit("imageUpload", [base64Image, imageType, setUsername, localStorage.getItem("colour"), roomCode])
         };
 
         reader.readAsDataURL(input.files[0]);
