@@ -351,11 +351,14 @@ def handle_user_upload(imageData):
 @socketio.on('message')
 def handle_message(message_data):
     username = message_data['username']
-    if len(username) > 12:
-        send_system_message("Username has to be 12 chars or less.", sid=request.sid)
+    if len(username) > 15:
+        send_system_message("Username has to be 15 chars or less.", sid=request.sid)
         return
     lowerUser = username.lower()
     message = message_data['message']
+    if len(message) > 150:
+        send_system_message("Message is farrrrr too long you can't send that sorry", sid=request.sid)
+        return
     UUID = message_data['UUID']
     roomNumber = message_data['roomNumber']
     date = epoch_to_dd_mm_yyyy()
@@ -518,8 +521,8 @@ def register(data):
     if len(hasSpaces) > 1:
         emit('registration_response', {'message': 'Username or password cannot contain spaces', 'colour': 'red'})
         return
-    if len(username) > 12:
-        emit('registration_response', {"message": "Username has to be 12 characters or less"})
+    if len(username) > 15:
+        emit('registration_response', {"message": "Username has to be 15 characters or less"})
         return
     password = data["password"]
     agreement = data["agreed"]
@@ -566,10 +569,10 @@ def login(data):
     username = data['username']
     hasSpaces = username.split(" ")
     if len(hasSpaces) > 1:
-        emit('registration_response', {'message': 'Username or password cannot contain spaces', 'colour': 'red'})
+        emit('login_response', {'message': 'Username or password cannot contain spaces', 'colour': 'red'})
         return
-    if len(username) > 12:
-        emit('registration_response', {"message": "Username has to be 12 characters or less"})
+    if len(username) > 15:
+        emit('login_response', {"message": "Username has to be 15 characters or less", 'colour': 'red'})
         return
     password = data['password']
     roomNumber = data["roomNumber"]

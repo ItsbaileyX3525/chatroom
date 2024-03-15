@@ -181,6 +181,10 @@ messageInput.addEventListener("keydown", function(e) {
             messageInput.value = "";
             return
         }
+        if(username.length > 150){
+            send_system_message("Message too long!!!!")
+            return
+        }
         var command = message.trim().split(" ");
 
         if (command[0] in cmds){
@@ -209,6 +213,10 @@ sendbutton.addEventListener('click', function(e) {
         messageInput.value = "";
         return
     }
+    if(username.length > 150){
+        send_system_message("Message too long!!!!")
+        return
+    }
     var command = message.trim().split(" ");
 
     if (command[0] in cmds){
@@ -228,6 +236,9 @@ sendbutton.addEventListener('click', function(e) {
 //Just shows notifactions for when someone connects or if the server would like to say anythin
 function showNotification(message) {
     const notification = document.getElementById('notification');
+    if (message.length > 15){
+        return
+    }
     notification.textContent = message;
     notification.style.display = 'block';
 
