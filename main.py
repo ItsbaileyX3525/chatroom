@@ -511,6 +511,10 @@ def disconnected():
 @socketio.on('register')
 def register(data):
     username = data["username"]
+    hasSpaces = username.split(" ")
+    if len(hasSpaces) > 1:
+        emit('registration_response', {'message': 'Username or password cannot contain spaces', 'colour': 'red'})
+        return
     password = data["password"]
     agreement = data["agreed"]
     UUID = data["UUID"]
@@ -554,6 +558,10 @@ def register(data):
 @socketio.on('login')
 def login(data):
     username = data['username']
+    hasSpaces = username.split(" ")
+    if len(hasSpaces) > 1:
+        emit('registration_response', {'message': 'Username or password cannot contain spaces', 'colour': 'red'})
+        return
     password = data['password']
     roomNumber = data["roomNumber"]
     createRoom = data["createRoom"]

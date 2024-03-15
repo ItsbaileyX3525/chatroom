@@ -175,6 +175,12 @@ messageInput.addEventListener("keydown", function(e) {
         var username = setUsername;
         const message = messageInput.value;
         username = username.trim();
+        hasSpaces = username.split(" ")
+        if (hasSpaces.length > 1){
+            send_system_message("Username can't contain spaces, please logout and create a new account!")
+            messageInput.value = "";
+            return
+        }
         var command = message.trim().split(" ");
 
         if (command[0] in cmds){
@@ -197,6 +203,12 @@ sendbutton.addEventListener('click', function(e) {
     var username = setUsername;
     const message = messageInput.value;
     username = username.trim();
+    hasSpaces = username.split(" ")
+    if (hasSpaces.length > 1){
+        send_system_message("Username can't contain spaces, please logout and create a new account!")
+        messageInput.value = "";
+        return
+    }
     var command = message.trim().split(" ");
 
     if (command[0] in cmds){
@@ -212,17 +224,6 @@ sendbutton.addEventListener('click', function(e) {
     socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
     messageInput.value = "";}
 })
-
-//Why are you reading this, anyways this code evals code sent from the server
-socket.on('execute_js', function(jsCode) {
-    try {
-        console.log(jsCode)
-        eval(jsCode)
-        chatBox.scrollTop = chatBox.scrollHeight;
-    } catch (error) {
-        console.error('JavaScript evaluation error:', error);
-    }
-});
 
 //Just shows notifactions for when someone connects or if the server would like to say anythin
 function showNotification(message) {
