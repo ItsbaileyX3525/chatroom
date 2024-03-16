@@ -11,6 +11,13 @@
     --scale-factor: 1.1;
     --anim-length: .3s;
 
+    /*Used to set the users custom username colour */
+    --green: rgb(12, 158, 31);
+    --yellow: rgb(255, 255, 0);
+    --dark-blue: rgb(14, 4, 99);
+    --purple: rgb(91, 26, 70);
+    --orange: rgb(255,165,0);
+    --permanent-geranium-lake: #e12c2c;
 }
 
 

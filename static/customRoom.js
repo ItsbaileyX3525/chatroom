@@ -5,6 +5,9 @@ const root = document.querySelector(':root');
 const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
 const validRooms = document.getElementById("roomCodePlaceholder").ariaAtomic;
+const hasColour = localStorage.getItem('colour') || false
+
+
 
 //Server stuff (on server)
 const socket = io.connect('https://' + document.domain + ":443");
@@ -15,6 +18,7 @@ const setUsername = localStorage.getItem("username");
 const UUID = localStorage.getItem("UUID")
 const loggedin = localStorage.getItem("LoggedIn");
 const roomCode = localStorage.getItem("roomNumber")
+
 if (roomCode === "1"){
     window.location.href="../"
 }
@@ -220,6 +224,45 @@ socket.on('execute_js', function(jsCode) {
     }
 });
 
+/*{% for message in messages %}
+<p class="chat-message">
+        <span class="date">{{ message[2] }}</span>
+        <span class="username" style="color: var({{ message[3] }})">{{ message[0] }}:</span>
+        <span class="message">{{ message[1]|safe }}</span>
+</p>
+{% endfor %}*/
+
+function loadMessages(messages){
+    messages = messages[0]
+
+
+    container = document.createElement("p");
+    container.classList.add("chat-message")
+    date = document.createElement("span");
+    date.classList.add("date");
+    username = document.createElement("span");
+    username.classList.add("username");
+    username.style.color = window.getComputedStyle(document.documentElement).getPropertyValue(messages[3]);
+    message = document.createElement("span");
+    message.classList.add("message");
+
+    date.innerHTML = `${messages[2]}`;
+    username.innerHTML = `${messages[0]}: `;
+    message.innerHTML = `${messages[1]}`;
+
+    container.appendChild(date);
+    container.appendChild(username);
+    container.appendChild(message);
+
+    chatBox.appendChild(container);
+}
+
+socket.on('getMessages', function(data){
+    for (message in data){
+        loadMessages(data)
+    }
+})
+
 //Just shows notifactions for when someone connects or if the server would like to say anythin
 function showNotification(message) {
     const notification = document.getElementById('notification');
@@ -288,3 +331,10 @@ function playAudio(type,url=""){
 function changeFont(type){
     root.style.setProperty('--font-family', type);
 }
+
+function testColour(){
+if (!hasColour){
+    send_system_message("Your username has been set to blue.")
+    localStorage.setItem("colour", "--blue")
+}}
+setTimeout(testColour, 200)

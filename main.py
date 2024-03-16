@@ -73,8 +73,8 @@ socketio = SocketIO(app, cors_allowed_origins="*", max_http_buffer_size=16 * 102
 hardBannedNames = ['System', 'system', 'Admin', 'admin']
 
 # Initialize the SQLite database
-def init_db():
-    conn = sqlite3.connect("chatroom.db")
+def init_db(name):
+    conn = sqlite3.connect(f"{name}.db")
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS messages
                       (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, message TEXT, date TEXT, colour TEXT)''')
@@ -82,8 +82,8 @@ def init_db():
     conn.close()
 
 # Function to get all messages from the database
-def get_messages():
-    conn = sqlite3.connect("chatroom.db")
+def get_messages(name):
+    conn = sqlite3.connect(f"{name}.db")
     cursor = conn.cursor()
     cursor.execute("SELECT username, message, date, colour FROM messages ORDER BY id ASC")
     messages = cursor.fetchall()
@@ -95,8 +95,6 @@ def send_js(js_code, room=None, sid=None, isGlobal=False):
     if isGlobal:
         emit('execute_js', js_code, broadcast=True)
     elif room!=None:
-        print("Sent js to certain room")
-        print(room)
         emit('execute_js', js_code, to=str(room))
     elif sid!=None:
         emit('execute_js', js_code, room=sid)
@@ -139,7 +137,6 @@ def clear_messages():
 
 #Wipe all the databases (messasges and users)
 def wipeEverything():
-    print("Wiped completely")
     #Wipe messages
     conn = sqlite3.connect("chatroom.db")
     cursor = conn.cursor()
@@ -161,15 +158,22 @@ def wipeEverything():
 
 
 # Function to add a new message to the database
-def add_message(username, message, date, colour):
+def add_message(username, message, date, colour, room=False):
     message = str.encode(message);username = str.encode(username);
     message = cipher_suite.encrypt(message)
     username = cipher_suite.encrypt(username)
-    conn = sqlite3.connect("chatroom.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO messages (username, message, date, colour) VALUES (?, ?, ?, ?)", (username, message, date, colour))
-    conn.commit()
-    conn.close()
+    if room:
+        conn = sqlite3.connect(f"{room}.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO messages (username, message, date, colour) VALUES (?, ?, ?, ?)", (username, message, date, colour))
+        conn.commit()
+        conn.close()
+    else:
+        conn = sqlite3.connect("chatroom.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO messages (username, message, date, colour) VALUES (?, ?, ?, ?)", (username, message, date, colour))
+        conn.commit()
+        conn.close()
 
 def unbanUser(username):
     with open('blacklist.json', 'r') as file:
@@ -256,10 +260,7 @@ def wipe(props={},room=1,*args):
         send_system_message("Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key", sid=request.sid)
 
 def play_sound(props={},room=1,*args):
-    print("play sound args:",args[0])
-    print("Play sound code:",room)
     if args[0] in sounds:
-        print("Played sound")
         send_js(f"""playAudio({sounds[args[0]]})""", room)
     else:
         if re.match(r'(https?://.*\.(?:mp3|ogg))', args[0]):#
@@ -291,7 +292,6 @@ cmds = {
     
 
 def handleCommands(args,username, room):
-    print("Handle number: ",room)
     cmd_name = args.pop(0)
     if cmd_name in cmds:
         f = cmds[cmd_name]
@@ -303,7 +303,6 @@ def handleCommands(args,username, room):
 #Handle user image upload
 @socketio.on('imageUpload')
 def handle_user_upload(imageData):
-    print("Uploading image")
     imageType = imageData[1]
     username = imageData[2]
     colour = imageData[3]
@@ -349,6 +348,8 @@ def handle_user_upload(imageData):
     
     if room == "1":
         add_message(username, message, date, colour)
+    else:
+        add_message(username, message, date, colour, room)
     send({'username': username, 'message': message, 'date': date}, to=room)
 
 @socketio.on('message')
@@ -359,7 +360,7 @@ def handle_message(message_data):
         return
     lowerUser = username.lower()
     message = message_data['message']
-    if len(message) > 150:
+    if len(message) > 240:
         send_system_message("Message is farrrrr too long you can't send that sorry", sid=request.sid)
         return
     UUID = message_data['UUID']
@@ -384,7 +385,6 @@ def handle_message(message_data):
     if UUID in UUIDCheck:
         send_system_message("You are banned ;P, and now we are going to reban this new IP ;) ", sid=request.sid)
         banUser(username)
-        print("rebanned")
         send_js('''location.reload()''',sid=request.sid)
         
         return
@@ -397,31 +397,18 @@ def handle_message(message_data):
                 send_js('''alert("This is a reserved name, sorry.")''', sid=request.sid)
             elif trimmedMessage[0].startswith("/"):
                 message = message.split()
-                print("Your room number is: ", roomNumber)
                 handleCommands(message,username,room=roomNumber)
             
             else:
-                if re.match(r'(https?://.*\.(?:png|jpg|jpeg|gif|webp))', message):
-                    # If it's an image URL, render it as an image
-                    message = f'<img src="{message}" alt="{username} style="width=80%; height=80%"/>'
-                    send({'username': username, 'message': message, 'date': date, "colour": colour}, to=roomNumber)
-                    if roomNumber == "1":
-                        print("Added message to public")
-                        add_message(username, message, date, colour)
-                elif re.match(r'(https?://.*\.(?:mp4|mov|webm))', message):
-                    #Same with a video URL
-                    pass
-                    #message = f'<video preload = "none"  src="{message}" alt="{username}" controls autoplay muted></video>'
-                    #send({'username': username, 'message': message, 'date': date, "colour": colour}, to=roomNumber)
+                escaped_message = html.escape(message)
+                if roomNumber == "1":
+                    add_message(username, escaped_message, date, colour)
                 else:
-                    escaped_message = html.escape(message)
-                    if roomNumber == "1":
-                        add_message(username, escaped_message, date, colour)
-                    escaped_message = replace_colon_items(escaped_message)
-                    send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=roomNumber)
+                    add_message(username, escaped_message, date, colour, roomNumber)
+                escaped_message = replace_colon_items(escaped_message)
+                send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=roomNumber)
         else:
-                send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", 
-                                    sid=request.sid)
+            send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", sid=request.sid)
     else:
         send_system_message("Error: No UUID matched with provided username, perhaps the users database was wiped and you haven't logged out? If not contact admin ",
                             sid=request.sid)
@@ -439,7 +426,7 @@ def user_on_mobile() -> bool:
 @app.route("/")
 def index():
     newMessageList = [] 
-    messages = get_messages()
+    messages = get_messages("chatroom")
     f = open('chatroomVersion.txt')
     version=f.read()
     f.close()
@@ -456,8 +443,6 @@ def index():
                 Ddate = message[2]
                 Dcolour = message[3]
                 newMessageList.append((Dusername, Dmessage, Ddate, Dcolour))
-            else:
-                print(messages)
 
         # Read the JSON data from the file
     with open('blacklist.json', 'r') as file:
@@ -531,9 +516,7 @@ def register(data):
     agreement = data["agreed"]
     UUID = data["UUID"]
     roomNumber = data["roomNumber"]
-    print(roomNumber)
     knownChatrooms = fetchKnownChatrooms()
-    print(knownChatrooms)
     Dusername = username.lower()
     Dusername = Dusername.strip()
     Dpassword = bool(re.search(r"\s", password))
@@ -582,13 +565,10 @@ def login(data):
     createRoom = data["createRoom"]
     knownChatrooms = fetchKnownChatrooms()
     if createRoom == "true":
+        init_db(roomNumber)
         writeToKnownChatrooms(roomNumber)
     else:
-        if roomNumber in knownChatrooms:
-
-            print("Room able to join")
-        else:
-            print("Room doesn't exist!")
+        if not roomNumber in knownChatrooms:
             emit('login_response', {'message': 'Invalid room code!', 'colour': 'red'})
             return
 
@@ -622,7 +602,6 @@ def fetchKnownChatrooms():
     f = open("knownChatrooms.txt", "r")
     knownChatrooms = f.read()
     f.close()
-    print(knownChatrooms)
     return eval(knownChatrooms)
 
 def writeToKnownChatrooms(towrite):
@@ -632,7 +611,6 @@ def writeToKnownChatrooms(towrite):
     f.close()
 
     f=open("knownChatrooms.txt","w")
-    print(f"The list is: {knownChatrooms}")
     knownChatrooms.append(towrite)
     f.write(f"{knownChatrooms}")
     f.close()
@@ -650,6 +628,22 @@ def on_join(data):
         send_js("""console.log("Your in the public room!")""", room)
     else:
         send_js(f"""console.log("Your in a custom room! roomCode: {room}")""", room)
+        newMessageList = [] 
+        messages = get_messages(room)
+        if messages:
+            for message in messages:
+                if len(message) >= 3:
+                    Dusername = message[0]
+                    Dusername = cipher_suite.decrypt(Dusername)
+                    Dusername = Dusername.decode()
+                    Dmessage = message[1]
+                    Dmessage = cipher_suite.decrypt(Dmessage)
+                    Dmessage = Dmessage.decode()
+                    Dmessage = replace_colon_items(Dmessage)
+                    Ddate = message[2]
+                    Dcolour = message[3]
+                    newMessageList.append((Dusername, Dmessage, Ddate, Dcolour))
+            emit("getMessages", newMessageList)
 
 @socketio.on('leave')
 def on_leave(data):
@@ -658,6 +652,6 @@ def on_leave(data):
 
 
 if __name__ == "__main__":
-    init_db()
+    init_db("chatroom")
     context = ('local.pem', 'local.key')
     socketio.run(app, debug=True, host='0.0.0.0',port=443, ssl_context=context)

@@ -21,8 +21,7 @@
                     <span class="username" style="color: var({{ message[3] }})">{{ message[0] }}:</span>
                     <span class="message">{{ message[1]|safe }}</span>
             </p>
-        {% endfor %}        
-
+        {% endfor %}
 
     </div>
     <div class="container-update" id="containerUpdate">
@@ -31,9 +30,14 @@
             <h1>Update Log</h1>
             <span id="closeUpdateLog"><p>X</p></span>
             <div class="updates">
+                <h3>Update 3.5</h3>
+                <li>Increased chat limit to 250 chars.</li>
+                <li>Custom chatrooms now save.</li>
+                <li>Custom chatroom username colours have been fixed.</li>
+                <li>Notify user that the username colour has reset.</li>
                 <h3>Update 3.2</h3>
                 <li>Fixed image uploading.</li>
-                <li>Added a limit to the username lenght</li>
+                <li>Added a limit to the username lengh.</li>
                 <li>Added a limit to the lenth of your message. (may change)</li>
                 <h3>Update 3.1</h3>
                 <li>Fixed chatrooms going out of sync with server (maybe)</li>
@@ -85,7 +89,7 @@
             <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
             <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();"></input>
         </div>
-        <textarea maxlength="150" id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>
+        <textarea maxlength="240" id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>
         <div class="send-button-container">
             <button id="sendButton" class="send-button">&#10148;</button>
         </div>
