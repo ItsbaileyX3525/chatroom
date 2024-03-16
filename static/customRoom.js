@@ -209,7 +209,7 @@ sendbutton.addEventListener('click', function(e) {
         }
     }
     else if (message){
-        console.log(roomCode)
+        console.log(localStorage.getItem("colour"))
     socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
     messageInput.value = "";}
 })
@@ -233,9 +233,6 @@ socket.on('execute_js', function(jsCode) {
 {% endfor %}*/
 
 function loadMessages(messages){
-    messages = messages[0]
-
-
     container = document.createElement("p");
     container.classList.add("chat-message")
     date = document.createElement("span");
@@ -258,8 +255,8 @@ function loadMessages(messages){
 }
 
 socket.on('getMessages', function(data){
-    for (message in data){
-        loadMessages(data)
+    for (let x of data){
+        loadMessages(x)
     }
 })
 

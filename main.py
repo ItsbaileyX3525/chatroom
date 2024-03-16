@@ -248,18 +248,18 @@ def send_system_message(message, sid):
         chatBox.appendChild(messageElement);''', sid=sid)
 
 
-def change_pwd(props={},room=1,*args):
+def change_pwd(props={},room="1",*args):
     success = change_password(props["username"],args[0])
     if success:
         send_system_message(f'Successfully changed password to {args[0]}' if success else f'Failed to change the password to {args[0]}', sid=request.sid)
 
-def wipe(props={},room=1,*args):
+def wipe(props={},room="1",*args):
     if args[0] == 'AdminKey':
         clear_messages()        
     else:
         send_system_message("Sorry but that key just isn't right. Perhaps you're not an admin and don't have the access key", sid=request.sid)
 
-def play_sound(props={},room=1,*args):
+def play_sound(props={},room="1",*args):
     if args[0] in sounds:
         send_js(f"""playAudio({sounds[args[0]]})""", room)
     else:
@@ -267,17 +267,17 @@ def play_sound(props={},room=1,*args):
             send_js(f'''playAudio('custom', "{args[0]}")''',room)
 
 
-def destroy_all(props={},room=1,*args):
+def destroy_all(props={},room="1",*args):
     if args[0] == "AdminKey":
         wipeEverything()
     else:
         send_system_message("Sorry but that key just isn't right", sid=request.sid)
 
-def ban(props={},room=1,*args):
+def ban(props={},room="1",*args):
     if args[0] == 'AdminKey':
         banUser(args[1])
         
-def unban(props={},room=1,*args):
+def unban(props={},room="1",*args):
     if args[0] == 'AdminKey':
         unbanUser(args[1])
 
@@ -306,7 +306,7 @@ def handle_user_upload(imageData):
     imageType = imageData[1]
     username = imageData[2]
     colour = imageData[3]
-    room = imageData[4]
+    room = str(imageData[4])
     date = epoch_to_dd_mm_yyyy()
     randomImageName = get_random_string(40)
 
@@ -364,7 +364,7 @@ def handle_message(message_data):
         send_system_message("Message is farrrrr too long you can't send that sorry", sid=request.sid)
         return
     UUID = message_data['UUID']
-    roomNumber = message_data['roomNumber']
+    roomNumber = str(message_data['roomNumber'])
     date = epoch_to_dd_mm_yyyy()
     colour = message_data['colour']
     trimmedMessage = message.split()
@@ -402,8 +402,10 @@ def handle_message(message_data):
             else:
                 escaped_message = html.escape(message)
                 if roomNumber == "1":
+                    print("In live")
                     add_message(username, escaped_message, date, colour)
                 else:
+                    print("The colours:",colour)
                     add_message(username, escaped_message, date, colour, roomNumber)
                 escaped_message = replace_colon_items(escaped_message)
                 send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=roomNumber)
@@ -515,7 +517,7 @@ def register(data):
     password = data["password"]
     agreement = data["agreed"]
     UUID = data["UUID"]
-    roomNumber = data["roomNumber"]
+    roomNumber = str(data["roomNumber"])
     knownChatrooms = fetchKnownChatrooms()
     Dusername = username.lower()
     Dusername = Dusername.strip()
@@ -544,7 +546,7 @@ def register(data):
             cursor.execute("INSERT INTO users (username, password, agreement, UUID) VALUES (?, ?, ?, ?)", (username, hashed_password, agreement, UUID))
             conn.commit() 
             emit('registration_response', {'message': 'Registration successful', 'colour': 'green'})
-            if roomNumber == 1:
+            if roomNumber == "1":
                 send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../"''', sid=request.sid)
             else:
                 send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../customRoom"''', sid=request.sid)
@@ -561,7 +563,7 @@ def login(data):
         emit('login_response', {"message": "Username has to be 15 characters or less", 'colour': 'red'})
         return
     password = data['password']
-    roomNumber = data["roomNumber"]
+    roomNumber = str(data["roomNumber"])
     createRoom = data["createRoom"]
     knownChatrooms = fetchKnownChatrooms()
     if createRoom == "true":
@@ -585,7 +587,7 @@ def login(data):
     conn.close()
     if hashed_password and bcrypt.checkpw(password.encode('utf-8'), hashed_password[0]):
         if agreed[0] == 'yes':
-            if roomNumber == 1:
+            if roomNumber == "1":
                 send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../"''', sid=request.sid)
             else:
                 send_js(f'''localStorage.setItem("username", "{username}");localStorage.setItem("UUID", "{UUID[0]}");localStorage.setItem("LoggedIn", 1);window.location.href = "../customRoom"''', sid=request.sid)
@@ -622,9 +624,9 @@ def rooms():
 
 @socketio.on('join')
 def on_join(data):
-    room = data['room']
+    room = str(data['room'])
     join_room(room)
-    if room == 1:
+    if room == "1":
         send_js("""console.log("Your in the public room!")""", room)
     else:
         send_js(f"""console.log("Your in a custom room! roomCode: {room}")""", room)
@@ -632,7 +634,7 @@ def on_join(data):
         messages = get_messages(room)
         if messages:
             for message in messages:
-                if len(message) >= 3:
+                if len(message) >= 4:
                     Dusername = message[0]
                     Dusername = cipher_suite.decrypt(Dusername)
                     Dusername = Dusername.decode()
@@ -642,12 +644,13 @@ def on_join(data):
                     Dmessage = replace_colon_items(Dmessage)
                     Ddate = message[2]
                     Dcolour = message[3]
+                    print("Ye color is: ",Dcolour)
                     newMessageList.append((Dusername, Dmessage, Ddate, Dcolour))
             emit("getMessages", newMessageList)
 
 @socketio.on('leave')
 def on_leave(data):
-    room = data['room']
+    room = str(data['room'])
     leave_room(room)
 
 
