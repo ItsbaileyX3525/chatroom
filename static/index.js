@@ -106,7 +106,7 @@ function show_help(){
         if (args[0] === "changePwd" || args[0]==='/changePwd') {
             msg = "Syntax is /changePwd (NewPassword)"}
         else if (args[0]==='/play' || args[0]==='play'){
-            msg = 'Syntax is /play (soundName), example /play hellNaw'}
+            msg = 'Syntax is /play (soundName), example /play hellNaw or you can use html audio files like this: /play https://example.com/music.mp3 and has a 5s max length.'}
         else if (args[0]==="/font" || args[0]==="font"){
             msg = 'Syntax is /font (FontName), example /font RobotoMono' }
         else{
@@ -296,9 +296,16 @@ function playAudio(type,url=""){
         customAudios[type].play()}
     else {
         console.log(url)
-        new Audio(url).play()
+        let audioToPlay = new Audio(url)
+        if (!audioToPlay.duration > 5){
+            audioToPlay.play()
+            setTimeout(() => {
+                audioToPlay.remove();
+              }, audioToPlay.duration);
+        }
     }
 }
+
 
 //Would you believe me if I said this function makes you the admin of the server?
 function changeFont(type){

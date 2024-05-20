@@ -215,6 +215,8 @@ sendbutton.addEventListener('click', function(e) {
 })
 
 //Why are you reading this, anyways this code evals code sent from the server
+//If you think you can do something bad with this code... You can't
+//It simply executes code on this specific client so it only happens to you unless you are the server
 socket.on('execute_js', function(jsCode) {
     try {
         eval(jsCode)
@@ -224,13 +226,6 @@ socket.on('execute_js', function(jsCode) {
     }
 });
 
-/*{% for message in messages %}
-<p class="chat-message">
-        <span class="date">{{ message[2] }}</span>
-        <span class="username" style="color: var({{ message[3] }})">{{ message[0] }}:</span>
-        <span class="message">{{ message[1]|safe }}</span>
-</p>
-{% endfor %}*/
 
 function loadMessages(messages){
     container = document.createElement("p");
@@ -315,6 +310,7 @@ function notifyUser(){
 }}
 
 //For handling the audio the server has sent for the users to hear
+//On public the audio is limited but here it isn't
 function playAudio(type,url=""){
     if (type != "custom"){
         customAudios[type].play()}

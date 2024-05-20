@@ -24,10 +24,11 @@ def get_random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 #setup the encrpytion - ripped from stack overflow lol
-f = open('key.env')
-key = f.read()
-key.encode()
-f.close()
+with open('key.env', 'r') as f:
+    key = f.read()
+    key.encode()
+    f.close()
+
 
 cipher_suite = Fernet(key) #setting up the cipher with the key
 encoded_text = cipher_suite.encrypt(b"Hello stackoverflow!") #Used to encrpyt text
@@ -39,6 +40,7 @@ def read_list_from_file(filename):
             # Read the content of the file and convert it to a list
             content = file.read()
             my_list = eval(content)
+            file.close()
             return my_list
     except FileNotFoundError:
         print(f"The file '{filename}' does not exist.")
@@ -83,12 +85,18 @@ def init_db(name):
 
 # Function to get all messages from the database
 def get_messages(name):
-    conn = sqlite3.connect(f"{name}.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT username, message, date, colour FROM messages ORDER BY id ASC")
-    messages = cursor.fetchall()
-    conn.close()
+    conn = None
+    try:
+        conn = sqlite3.connect(f"{name}.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT username, message, date, colour FROM messages ORDER BY id ASC")
+        messages = cursor.fetchall()
+        conn.close()
+    finally:
+        if conn:
+            conn.close()
     return messages
+
 
 @socketio.on('send_js_code')
 def send_js(js_code, room=None, sid=None, isGlobal=False):
@@ -499,11 +507,6 @@ create_table_accounts()
 def connected(username,room):
     send_js(f'''showNotification("{username} has connected!")''', room=room)
 
-@socketio.on('disconnect')
-def disconnected():
-    #:(
-    print("user left the server.")
-
 @socketio.on('register')
 def register(data):
     username = data["username"]
@@ -652,7 +655,6 @@ def on_join(data):
 def on_leave(data):
     room = str(data['room'])
     leave_room(room)
-
 
 if __name__ == "__main__":
     init_db("chatroom")
