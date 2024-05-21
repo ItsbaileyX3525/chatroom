@@ -91,7 +91,7 @@ fonts={
 
 colourTypes = {
     "blue": "--light-blue",
-    "Dblue": "--dark-blue",
+    "dBlue": "--dark-blue",
     "green": "--green",
     "yellow": "--yellow",
     "purple": "--purple",
@@ -105,13 +105,16 @@ function show_help(){
         if (args[0] === "changePwd" || args[0]==='/changePwd') {
             msg = "Syntax is /changePwd (NewPassword)"}
         else if (args[0]==='/play' || args[0]==='play'){
-            msg = 'Syntax is /play (soundName), example /play hellNaw'}
+            msg = 'Syntax is /play (soundName), example /play hellNaw or you can use html audio files like this: /play https://example.com/music.mp3 and has a 5s max length.'}
         else if (args[0]==="/font" || args[0]==="font"){
             msg = 'Syntax is /font (FontName), example /font RobotoMono' }
+        else if (args[0]==="/color" ||args[0]==="color" ||args[0]==="/colour" ||args[0]==="colour"){
+            msg = "Syntax is /color or /colour (colourName), example /colour green" }
         else{
-            msg = "That command doesn't exist or doesn't have any help related to it." }}
+            msg = "That command doesn't exist or doesn't have any help related to it." }
+        }
     else{
-        msg = "The current list of commands are: /help, /emojis, /emojiList, /play, /playList, /font, /fontList and /changePwd for specific help use /help (command)"}
+        msg = "The current list of commands are: /help, /emojis, /emojiList, /play, /playList, /colour (or /color), /colourList, /font, /fontList and /changePwd for specific help use /help (command)"}
     send_system_message(msg)
     return true
 }
@@ -154,6 +157,11 @@ function change_colour(){
     }
 }
 
+function colour_list(){
+    send_system_message("Current list of name colours are: 'green', 'blue', 'dBlue', 'yellow', 'purple', 'orange', 'permanentGeraniumLake'")
+    return true
+}
+
 //All the commands that the client can run
 cmds = {
     "/help": show_help,
@@ -163,6 +171,8 @@ cmds = {
     "/fontList": font_list,
     "/colour": change_colour,
     "/color": change_colour, //Cause americans are stinky and don't know how to spell colour
+    "/colourList": colour_list,
+    "/colorList": colour_list,
     "/playList": sound_list
 }
 
@@ -197,6 +207,16 @@ sendbutton.addEventListener('click', function(e) {
     var username = setUsername;
     const message = messageInput.value;
     username = username.trim();
+    hasSpaces = username.split(" ")
+    if (hasSpaces.length > 1){
+        send_system_message("Username can't contain spaces, please logout and create a new account!")
+        messageInput.value = "";
+        return
+    }
+    if(username.length > 35){
+        send_system_message("Username too long!!!!")
+        return
+    }
     var command = message.trim().split(" ");
 
     if (command[0] in cmds){
@@ -209,11 +229,9 @@ sendbutton.addEventListener('click', function(e) {
         }
     }
     else if (message){
-        console.log(localStorage.getItem("colour"))
     socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
     messageInput.value = "";}
-})
-
+});
 //Why are you reading this, anyways this code evals code sent from the server
 //If you think you can do something bad with this code... You can't
 //It simply executes code on this specific client so it only happens to you unless you are the server
