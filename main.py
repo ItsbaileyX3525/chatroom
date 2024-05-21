@@ -27,7 +27,6 @@ def get_random_string(length):
 with open('key.env', 'r') as f:
     key = f.read()
     key.encode()
-    f.close()
 
 
 cipher_suite = Fernet(key) #setting up the cipher with the key
@@ -37,15 +36,14 @@ decoded_text = cipher_suite.decrypt(encoded_text) #Used to decrypt
 def read_list_from_file(filename):
     try:
         with open(filename, 'r', encoding='utf-8') as file:
-            # Read the content of the file and convert it to a list
             content = file.read()
             my_list = eval(content)
-            file.close()
             return my_list
     except FileNotFoundError:
         print(f"The file '{filename}' does not exist.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 data_list = read_list_from_file('emojis.emo')
 
@@ -111,15 +109,20 @@ def send_js(js_code, room=None, sid=None, isGlobal=False):
 
 
 def get_password(username):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT password FROM users WHERE username=?", (username,))
-    password = cursor.fetchone()
-    conn.close()
+    conn = None
+    try:
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT password FROM users WHERE username=?", (username,))
+        password = cursor.fetchone()
+    finally:
+        if conn:
+            conn.close()
     if password:
         return password[0]
     else:
         return None
+
 
 def change_password(username, new_password):
     try:
@@ -309,56 +312,43 @@ def handleCommands(args,username, room):
         send_system_message("Sorry I don't believe that is a command, perhaps check your spelling?", sid=request.sid)
 
 #Handle user image upload
+def save_image(image_data, file_path):
+    with open(file_path, "wb") as f:
+        f.write(base64.b64decode(image_data))
+
 @socketio.on('imageUpload')
 def handle_user_upload(imageData):
+    base64_prefixes = {
+        'png': "data:image/png;base64,",
+        'jpg': "data:image/jpg;base64,",
+        'jpeg': "data:image/jpeg;base64,",
+        'webp': "data:image/webp;base64,",
+        'gif': "data:image/gif;base64,",
+        'jfif': "data:image/jpeg;base64,"
+    }
+    
     imageType = imageData[1]
     username = imageData[2]
     colour = imageData[3]
     room = str(imageData[4])
     date = epoch_to_dd_mm_yyyy()
     randomImageName = get_random_string(40)
-
-    if imageType == 'png':
-        imageDataU = imageData[0][len("data:image/png;base64,"):]
-        image = base64.b64decode(imageDataU)
-        f = open(f"static/usersUploaded/{randomImageName}.png", "wb")
-        f.write(image)
-        f.close()
-
-        message = f'<img src="../static/usersUploaded/{randomImageName}.png" alt="{username}"/>'
-
-    elif imageType == 'jpg':
-        imageDataU = imageData[0][len("data:image/jpg;base64,"):]
-        image = base64.b64decode(imageDataU)
-        f = open(f"static/usersUploaded/{randomImageName}.jpg", "wb")
-        f.write(image)
-        f.close()
-
-        message = f'<img src="../static/usersUploaded/{randomImageName}.jpg" alt="{username}"/>'
-
-    elif imageType == 'jpeg':
-        imageDataU = imageData[0][len("data:image/jpg;base64,"):]
-        image = base64.b64decode(imageDataU)
-        f = open(f"static/usersUploaded/{randomImageName}.jpeg", "wb")
-        f.write(image)
-        f.close()
-
-        message = f'<img src="../static/usersUploaded/{randomImageName}.jpeg" alt="{username}"/>'
-
-    elif imageType == 'webp':
-        imageDataU = imageData[0][len("data:image/webp;base64,"):]
-        image = base64.b64decode(imageDataU)
-        f = open(f"static/usersUploaded/{randomImageName}.webp", "wb")
-        f.write(image)
-        f.close()
-
-        message = f'<img src="../static/usersUploaded/{randomImageName}.webp" alt="{username}">'
     
-    if room == "1":
-        add_message(username, message, date, colour)
-    else:
-        add_message(username, message, date, colour, room)
-    send({'username': username, 'message': message, 'date': date}, to=room)
+    if imageType in base64_prefixes:
+        prefix = base64_prefixes[imageType]
+        imageDataU = imageData[0][len(prefix):]
+        file_path = f"static/usersUploaded/{randomImageName}.{imageType}"
+        
+        save_image(imageDataU, file_path)
+        
+        message = f'<img src="../{file_path}" alt="{username}"/>'
+        
+        if room == "1":
+            add_message(username, message, date, colour)
+        else:
+            add_message(username, message, date, colour, room)
+            
+        send({'username': username, 'message': message, 'date': date}, to=room)
 
 @socketio.on('message')
 def handle_message(message_data):

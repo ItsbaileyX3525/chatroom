@@ -90,8 +90,8 @@
     </div>
     <div class="container">
         <div class="file-upload-container">
-            <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
-            <input type='file' id="uploadImage" accept="image/png, image/jpeg, image/webp" onchange="handleUpload();"></input>
+            <label for="uploadImage" style="cursor: pointer;"><i class="fa-solid fa-circle-plus"></i></label>
+            <input type='file' id="uploadImage" accept="image/*" onchange="handleUpload();"></input>
         </div>
         <textarea maxlength="240" id="messageInput" class="input-field" rows="3" placeholder="Type your message..."></textarea>
         <div class="send-button-container">

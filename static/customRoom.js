@@ -278,28 +278,32 @@ addEventListener("DOMContentLoaded", (event) => {
 
 //Used to handle user uploading imges to the server
 function handleUpload() {
-const input = document.getElementById('uploadImage');
-if (input.files && input.files[0]) {
-    var imageType
-    if (input.files[0].name.endsWith(".png")){
-        imageType = 'png'
-    }else if (input.files[0].name.endsWith(".jpg") || input.files[0].name.endsWith(".jpeg")){
-        imageType = 'jpg'
-    } else if (input.files[0].name.endsWith(".webp")){ 
-    imageType = 'webp'
+    const input = document.getElementById('uploadImage');
+    if (input.files && input.files[0]) {
+        var imageType
+        if (input.files[0].name.endsWith(".png")){
+            imageType = 'png'
+        }else if (input.files[0].name.endsWith(".jpg") || input.files[0].name.endsWith(".jpeg")){
+            imageType = 'jpg'
+        } else if (input.files[0].name.endsWith(".webp")){ 
+        imageType = 'webp'
+        } else if (input.files[0].name.endsWith(".gif")){
+        imageType = 'gif'
+        } else if (input.files[0].name.endsWith(".jfif")){
+        imageType = 'jfif'
+        }
+        const reader = new FileReader();
+    
+        reader.onload = function (e) {
+            const base64Image = e.target.result;
+            socket.emit("imageUpload", [base64Image, imageType, setUsername, localStorage.getItem("colour"), roomCode])
+            };
+    
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            console.error('No image selected.');
+        }
     }
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-        const base64Image = e.target.result;
-        socket.emit("imageUpload", [base64Image, imageType, setUsername, localStorage.getItem("colour"), roomCode])
-        };
-
-        reader.readAsDataURL(input.files[0]);
-    } else {
-        console.error('No image selected.');
-    }
-}
 
 //For annoying the shit out of people, may remove or change notif sound
 discordNotifaction = new Audio('static/noti.ogg')

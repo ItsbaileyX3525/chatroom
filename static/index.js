@@ -268,6 +268,10 @@ if (input.files && input.files[0]) {
         imageType = 'jpg'
     } else if (input.files[0].name.endsWith(".webp")){ 
     imageType = 'webp'
+    } else if (input.files[0].name.endsWith(".gif")){
+    imageType = 'gif'
+    } else if (input.files[0].name.endsWith(".jfif")){
+    imageType = 'jfif'
     }
     const reader = new FileReader();
 
