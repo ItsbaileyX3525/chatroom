@@ -318,6 +318,18 @@ def save_image(image_data, file_path):
 
 @socketio.on('imageUpload')
 def handle_user_upload(imageData):
+    UUID = imageData[5]
+    username = imageData[6]
+    with open('blacklistUUID.json', 'r') as file:
+        UUIDCheck = json.load(file)
+
+    if UUID in UUIDCheck:
+        send_system_message("You are banned ;P, and now we are going to reban this new IP ;) ", sid=request.sid)
+        banUser(username)
+        send_js('''location.reload()''',sid=request.sid)
+        
+        return
+
     base64_prefixes = {
         'png': "data:image/png;base64,",
         'jpg': "data:image/jpg;base64,",

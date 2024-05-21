@@ -274,10 +274,11 @@ if (input.files && input.files[0]) {
     imageType = 'jfif'
     }
     const reader = new FileReader();
+    Username = setUsername
 
     reader.onload = function (e) {
         const base64Image = e.target.result;
-        socket.emit("imageUpload", [base64Image, imageType, setUsername, localStorage.getItem("colour"), roomCode])
+        socket.emit("imageUpload", [base64Image, imageType, setUsername, localStorage.getItem("colour"), roomCode, UUID, Username])
         };
 
         reader.readAsDataURL(input.files[0]);
