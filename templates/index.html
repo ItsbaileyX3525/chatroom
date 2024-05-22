@@ -24,9 +24,40 @@
         {% endfor %}
 
     </div>
+    <nav class="sidebar">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <img src="{{ url_for('static', filename='favicon.ico') }}" alt="Logo">
+                </span>
+                <div class="text header-text">
+                    <span class="name">Navigation</span>
+                    <span class="site">Bailey's chatroom</span>
+                
+                </div>
+            </div>
+
+            <i class="fa-solid fa-chevron-right toggle"></i>
+        </header>
+
+        <div class="menu-bar">
+            <div class="menu">
+               <ul class="menu-links">
+                    <li class="nav-link">
+                        <a href="#">
+                            <i class="fa-solid fa-house"></i>
+                            <span class="text nav-text">Dashboard</span>
+                        </a>
+                    </li>
+
+               </ul> 
+            </div>
+        </div>
+    </nav>
+
+    </div>
     <div class="container-update" id="containerUpdate">
         <div class="update-container">
-
             <h1>Update Log</h1>
             <span id="closeUpdateLog"><p>X</p></span>
             <div class="updates">

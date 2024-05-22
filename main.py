@@ -371,7 +371,7 @@ def handle_message(message_data):
     lowerUser = username.lower()
     message = message_data['message']
     if len(message) > 240:
-        send_system_message("Message is farrrrr too long you can't send that sorry", sid=request.sid)
+        send_system_message("Message is farrrrr too long. You can't send that, sorry", sid=request.sid)
         return
     UUID = message_data['UUID']
     roomNumber = str(message_data['roomNumber'])
