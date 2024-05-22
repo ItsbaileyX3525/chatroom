@@ -412,7 +412,6 @@ def handle_message(message_data):
             else:
                 escaped_message = html.escape(message)
                 if roomNumber == "1":
-                    print("In live")
                     add_message(username, escaped_message, date, colour)
                 else:
                     print("The colours:",colour)
