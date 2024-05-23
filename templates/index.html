@@ -7,7 +7,7 @@
         <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
         <link rel="stylesheet" href="static/index.css">
-        
+        <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
         <meta property="og:title" content="Bailey's chatroom">
         <meta property="og:description" content="Welcome to the chatroom of Bailey, talk discuss and do whatever!">
         <meta property="og:image" content="https://i.ibb.co/rpgNnkK/image.png">
@@ -24,43 +24,44 @@
         {% endfor %}
 
     </div>
-    <nav class="sidebar">
+    <nav class="sidebar close">
         <header>
             <div class="image-text">
                 <span class="image">
-                    <img src="{{ url_for('static', filename='favicon.ico') }}" alt="Logo">
+                    <img src="{{ url_for('static', filename='favicon.ico') }}" alt="">
                 </span>
-                <div class="text header-text">
-                    <span class="name">Navigation</span>
-                    <span class="site">Bailey's chatroom</span>
-                
+                <div class="text logo-text">
+                    <span id="usernameName" class="name">Username</span>
+                    <span class="profession">Bailey's chatroom</span>
                 </div>
             </div>
-
-            <i class="fa-solid fa-chevron-right toggle"></i>
+            <i class='bx bx-chevron-right toggle'></i>
         </header>
-
         <div class="menu-bar">
             <div class="menu">
-               <ul class="menu-links">
-                    <li class="nav-link">
-                        <a href="#">
-                            <i class="fa-solid fa-house"></i>
-                            <span class="text nav-text">Dashboard</span>
-                        </a>
-                    </li>
-
-               </ul> 
+                <ul class="menu-links">
+                </ul>
+            </div>
+            <div class="bottom-content">
+                <li class="">
+                    <i style="cursor: pointer;" onclick="Logout()" class='bx bx-log-out icon' ></i>
+                   <span class="text nav-text" style="cursor: pointer;" onclick="Logout()">Logout</span>
+                </li>
+                <li class="mode">
+                    <div class="chatroom-version">Chatroom version: {{ version }}</div>
+                </li>
+                
             </div>
         </div>
     </nav>
 
-    </div>
     <div class="container-update" id="containerUpdate">
         <div class="update-container">
             <h1>Update Log</h1>
             <span id="closeUpdateLog"><p>X</p></span>
             <div class="updates">
+                <h3>Update 4.5 - Sidebar nav</h3>
+                <li>Added a sidebar navigation for ease of use.</li>
                 <h3>Update 4.1 - Image supporting</h3>
                 <li>Added support for every image, gifs included!</li>
                 <li>Fixed a few memory leaks improving memory usage.</li>
@@ -70,7 +71,7 @@
                 <li>Added help for colour types and displaying all colours.</li>
                 <h3>Update 4 - The APK and EXE update.</h3>
                 <li>Created a build for windows and linux. (exe and sh)</li>
-                <li>Created an apk for mobile <a href="https://example.com" style="color: salmon;">HERE.</a></li>
+                <li>Created an apk for mobile <a target="_blank" href="https://github.com/ItsbaileyX3525/chatroom/raw/master/build/Chatroom.apk" style="color: salmon;">HERE.</a></li>
                 <li>Added a custom sound max length.</li>
                 <h3>Update 3.5</h3>
                 <li>Increased chat limit to 250 chars.</li>
@@ -136,10 +137,32 @@
             <button id="sendButton" class="send-button">&#10148;</button>
         </div>
     </div>
-    <div class="chatroom-version">Chatroom version: {{ version }}</div>
-    <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="../static/index.js"></script>
+    <script>
+        const body = document.querySelector('body'),
+      sidebar = body.querySelector('nav'),
+      toggle = body.querySelector(".toggle"),
+      searchBtn = body.querySelector(".search-box"),
+      modeSwitch = body.querySelector(".toggle-switch"),
+      modeText = body.querySelector(".mode-text");
+toggle.addEventListener("click" , () =>{
+    sidebar.classList.toggle("close");
+})
+searchBtn.addEventListener("click" , () =>{
+    sidebar.classList.remove("close");
+})
+modeSwitch.addEventListener("click" , () =>{
+    body.classList.toggle("dark");
+    
+    if(body.classList.contains("dark")){
+        modeText.innerText = "Light mode";
+    }else{
+        modeText.innerText = "Dark mode";
+        
+    }
+});
+    </script>
     <!--<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ItsbaileyX3525" data-color="#FF5F5F" data-emoji="☕"  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>-->
 </body>
 </html>

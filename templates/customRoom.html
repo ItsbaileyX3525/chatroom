@@ -7,6 +7,7 @@
         <script src="https://kit.fontawesome.com/e33e38ee00.js" crossorigin="anonymous"></script>
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
         <link rel="stylesheet" href="static/index.css">
+        <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
         <meta id="roomCodePlaceholder" aria-atomic="{{ knownChatrooms }}">
         <meta property="og:title" content="Bailey's chatroom">
         <meta property="og:description" content="Welcome to the chatroom of Bailey, talk discuss and do whatever!">
@@ -23,6 +24,35 @@
             </p>
         {% endfor %}
     </div>
+    <nav class="sidebar close">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <img src="{{ url_for('static', filename='favicon.ico') }}" alt="">
+                </span>
+                <div class="text logo-text">
+                    <span id="usernameName" class="name">Username</span>
+                    <span class="profession">Bailey's chatroom</span>
+                </div>
+            </div>
+            <i class='bx bx-chevron-right toggle'></i>
+        </header>
+        <div class="menu-bar">
+            <div class="menu">
+                <ul class="menu-links">
+                </ul>
+            </div>
+            <div class="bottom-content">
+                <li class="">
+                    <i style="cursor: pointer;" onclick="Logout()" class='bx bx-log-out icon' ></i>
+                   <span class="text nav-text" style="cursor: pointer;" onclick="Logout()">Logout</span>
+                </li>
+                <li class="mode">
+                    <div class="chatroom-version">Chatroom version: Custom</div>
+                </li>
+            </div>
+        </div>
+    </nav>
     <div class="container">
         <div class="file-upload-container">
             <label for="uploadImage"><i class="fa-solid fa-circle-plus"></i></label>
@@ -33,10 +63,32 @@
             <button id="sendButton" class="send-button">&#10148;</button>
         </div>
     </div>
-    <div class="chatroom-version">Chatroom version: Custom</div>
-    <button class="logout-button" role="button" onclick="Logout()">Logout</button><br><br>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="../static/customRoom.js"></script>
+    <script>
+        const body = document.querySelector('body'),
+      sidebar = body.querySelector('nav'),
+      toggle = body.querySelector(".toggle"),
+      searchBtn = body.querySelector(".search-box"),
+      modeSwitch = body.querySelector(".toggle-switch"),
+      modeText = body.querySelector(".mode-text");
+toggle.addEventListener("click" , () =>{
+    sidebar.classList.toggle("close");
+})
+searchBtn.addEventListener("click" , () =>{
+    sidebar.classList.remove("close");
+})
+modeSwitch.addEventListener("click" , () =>{
+    body.classList.toggle("dark");
+    
+    if(body.classList.contains("dark")){
+        modeText.innerText = "Light mode";
+    }else{
+        modeText.innerText = "Dark mode";
+        
+    }
+});
+    </script>
     <!--<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ItsbaileyX3525" data-color="#FF5F5F" data-emoji="☕"  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>-->
 </body>
 </html>

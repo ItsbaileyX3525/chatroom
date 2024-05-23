@@ -4,7 +4,7 @@ document.documentElement.style.setProperty('--font-family:', userFont);
 const root = document.querySelector(':root');
 const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
-const seenUpdate = localStorage.getItem("ClosedUpdates3")
+const seenUpdate = localStorage.getItem("ClosedUpdates4") || false
 
 if(seenUpdate === "true"){
     containerUpdate.style.display = "none"
@@ -335,3 +335,7 @@ socket.on('execute_js', function(jsCode) {
         console.error('JavaScript evaluation error:', error);
     }
 });
+
+
+const names = document.getElementById("usernameName")
+names.textContent = setUsername
