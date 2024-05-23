@@ -424,7 +424,7 @@ header .image-text .profession{
 }
 .sidebar header .image img{
     border-radius: 6px;
-    width: 0;
+    width: 44px;
 }
 .sidebar header .toggle{
     position: absolute;
@@ -516,15 +516,6 @@ body.dark .sidebar li a:hover .text{
 .mode .sun-moon i{
     position: absolute;
 }
-.mode .sun-moon i.sun{
-    opacity: 0;
-}
-body.dark .mode .sun-moon i.sun{
-    opacity: 1;
-}
-body.dark .mode .sun-moon i.moon{
-    opacity: 0;
-}
 .menu-bar .bottom-content .toggle-switch{
     position: absolute;
     right: 0;
@@ -610,6 +601,10 @@ Mobile
     .sidebar.close{
         width: 0px;
     }
+    .sidebar header .image img{
+        border-radius: 6px;
+        opacity: 0;
+    }
     @media only screen and (max-width: 450px) { 
         body{
             margin: 0 3%;
@@ -626,6 +621,7 @@ Mobile
         }
         .container {
             margin: 5% 0;
+            margin-left: 20px;
         }
         .file-upload-container {
             order: 1;

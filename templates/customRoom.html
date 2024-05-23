@@ -72,22 +72,19 @@
       searchBtn = body.querySelector(".search-box"),
       modeSwitch = body.querySelector(".toggle-switch"),
       modeText = body.querySelector(".mode-text");
+      let onPhone = false
+      const iconThing = document.getElementById("iconThing")
 toggle.addEventListener("click" , () =>{
     sidebar.classList.toggle("close");
-})
-searchBtn.addEventListener("click" , () =>{
-    sidebar.classList.remove("close");
-})
-modeSwitch.addEventListener("click" , () =>{
-    body.classList.toggle("dark");
-    
-    if(body.classList.contains("dark")){
-        modeText.innerText = "Light mode";
-    }else{
-        modeText.innerText = "Dark mode";
-        
+    if (iconThing.style.opacity == 0){
+        onPhone = true
+        iconThing.style.opacity = 1
     }
-});
+    else if (iconThing.style.opacity == 1 && onPhone){
+        iconThing.style.opacity = 0
+    }
+    
+})
     </script>
     <!--<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ItsbaileyX3525" data-color="#FF5F5F" data-emoji="☕"  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>-->
 </body>
