@@ -191,7 +191,7 @@ messageInput.addEventListener("keydown", function(e) {
             messageInput.value = "";
             return
         }
-        if(username.length > 35){
+        if(username.length > 20){
             send_system_message("Username too long!!!!")
             return
         }
@@ -223,7 +223,7 @@ sendbutton.addEventListener('click', function(e) {
             messageInput.value = "";
             return
         }
-        if(username.length > 35){
+        if(username.length > 20){
             send_system_message("Username too long!!!!")
             return
         }

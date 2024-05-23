@@ -32,7 +32,7 @@
                 </span>
                 <div class="text logo-text">
                     <span id="usernameName" class="name">Username</span>
-                    <span class="profession">Bailey's chatroom</span>
+                    <span class="profession">Welcome!</span>
                 </div>
             </div>
             <i class='bx bx-chevron-right toggle'></i>
@@ -146,10 +146,14 @@
       searchBtn = body.querySelector(".search-box"),
       modeSwitch = body.querySelector(".toggle-switch"),
       modeText = body.querySelector(".mode-text");
+      let usernameText = document.getElementById("usernameName")
       let onPhone = false
       const iconThing = document.getElementById("iconThing")
 toggle.addEventListener("click" , () =>{
     sidebar.classList.toggle("close");
+    if (usernameText.textContent.length > 8){
+        console.log("Wrap username...")
+    }
     if (iconThing.style.opacity == 0){
         onPhone = true
         iconThing.style.opacity = 1

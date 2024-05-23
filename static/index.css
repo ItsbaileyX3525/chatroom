@@ -100,19 +100,15 @@ Chat Box
     word-wrap: break-word;
     color: var(--text-color);
     padding: 0 15px;
-    margin-left: 7%;
+    margin-left: 15px;
     margin-top: calc(1.5rem + 20px + 2%);
 }
-
-.chat-message{
-    position: relative;
-    margin-bottom: 2%;
-}
-
 
 .chat-message {
     margin: 10px 0;
     padding: 10px;
+    position: relative;
+    margin-bottom: 2%;
     border-radius: 5px;
     background-color: var(--background-light);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
@@ -349,14 +345,15 @@ Sidebar
     top: 0;
     left: 0;
     height: 100%;
-    width: 250px;
+    width: 35%;
+    max-width: 250px;
     padding: 10px 14px;
     background: var(--sidebar-color);
     transition: var(--tran-05);
     z-index: 100;  
 }
 .sidebar.close{
-    width: 88px;
+    width: 0px;
 }
 /* ===== Reusable code - Here ===== */
 .sidebar li{
@@ -422,9 +419,11 @@ header .image-text .profession{
     justify-content: center;
    
 }
+
 .sidebar header .image img{
     border-radius: 6px;
     width: 44px;
+    opacity: 0;
 }
 .sidebar header .toggle{
     position: absolute;
@@ -598,13 +597,7 @@ Mobile
         position: absolute;
         left:10%;
     }
-    .sidebar.close{
-        width: 0px;
-    }
-    .sidebar header .image img{
-        border-radius: 6px;
-        opacity: 0;
-    }
+
     @media only screen and (max-width: 450px) { 
         body{
             margin: 0 3%;
@@ -631,6 +624,7 @@ Mobile
         }
         .input-field {
             width: 75%;
+            margin-left: 15px;
         }
         .chatroom-version{
             left: 3%;
