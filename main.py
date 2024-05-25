@@ -318,6 +318,7 @@ def save_image(image_data, file_path):
 
 @socketio.on('imageUpload')
 def handle_user_upload(imageData):
+    canSend = False
     UUID = imageData[5]
     username = imageData[6]
     with open('blacklistUUID.json', 'r') as file:
@@ -329,6 +330,23 @@ def handle_user_upload(imageData):
         send_js('''location.reload()''',sid=request.sid)
         
         return
+
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT UUID FROM users WHERE username = ?", (username,))
+    result = cursor.fetchone()
+    conn.close()
+
+
+    if result:
+        uuid = result[0]
+        if UUID == uuid:
+            canSend=True
+        else:
+            send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", sid=request.sid)
+    else:
+        send_system_message("Error: No UUID matched with provided username, perhaps the users database was wiped and you haven't logged out? If not contact admin ",
+                            sid=request.sid)
 
     base64_prefixes = {
         'png': "data:image/png;base64,",
@@ -346,7 +364,7 @@ def handle_user_upload(imageData):
     date = epoch_to_dd_mm_yyyy()
     randomImageName = get_random_string(40)
     
-    if imageType in base64_prefixes:
+    if imageType in base64_prefixes and canSend:
         prefix = base64_prefixes[imageType]
         imageDataU = imageData[0][len(prefix):]
         file_path = f"static/usersUploaded/{randomImageName}.{imageType}"
@@ -555,6 +573,16 @@ def register(data):
             else:
                 send_js(f'''localStorage.setItem('username', "{username}");localStorage.setItem('colour', "--light-blue");localStorage.setItem('UUID', "{UUID}");localStorage.setItem('LoggedIn', 1);window.location.href = "../customRoom"''', sid=request.sid)
     conn.close()
+
+@socketio.on('joinRoom')
+def joinRoom(data):
+    knownRooms = fetchKnownChatrooms()
+    roomToJoin =  str(data["joinRoom"])
+    if not roomToJoin in knownRooms:
+        if len(roomToJoin) == 5:
+            init_db(roomToJoin)
+            writeToKnownChatrooms(roomToJoin)
+
 
 @socketio.on('login')
 def login(data):

@@ -40,6 +40,41 @@
         <div class="menu-bar">
             <div class="menu">
                 <ul class="menu-links">
+                    <li class="nav-link">
+                           <span class="text nav-text" id="RoomCode">Room code: Public (1)</span>
+                    </li>
+                    <li class="nav-link">
+                        <span class="text nav-text">Play sound:<br style="display: none;" id="ForMobile">
+                                <select class="selection" name="sounds" id="play_sounds"> 
+                                    <option value="pluh">Pluh</option> 
+                                    <option value="whatDaDogDoin">Dog doin?</option> 
+                                    <option value="mew">Mew</option> 
+                                    <option value="clang">Clang</option> 
+                                    <option value="boom">Boom</option> 
+                                    <option value="gay">Gay</option> 
+                                    <option value="hellNaw">Hell naw!</option> 
+                                </select><br id="ForDesktop">
+                                <button class="play-button" role="button">Play</button>
+                        </span>
+                 </li>
+                 <li class="nav-link">
+                    <span class="text nav-text">Set colour: <br style="display: none;" id="ForMobile2">
+                        <select class="selection" name="colours" id="set_colour"> 
+                            <option value="green">Green</option> 
+                            <option value="blue">Blue</option> 
+                            <option value="dBlue">Dark blue</option> 
+                            <option value="purple">Purple</option> 
+                            <option value="orange">Orange</option> 
+                            <option value="permanentGeraniumLake">Red</option> 
+                        </select>
+                    </span>
+                 </li>
+                 <li class="nav-link">
+                    <span class="text nav-text">Join room: <br style="display: none;" id="ForMobile3">
+                        <input maxlength="5" id="RoomInput" style="width: 20%;"></input><br id="ForDeskop2">
+                        <button class="play-button" id="joinRoom" role="button" style="width: 70%;">Join</button>
+                    </span>
+                 </li>
                 </ul>
             </div>
             <div class="bottom-content">
@@ -60,6 +95,10 @@
             <h1>Update Log</h1>
             <span id="closeUpdateLog"><p>X</p></span>
             <div class="updates">
+                <h3>Update 4.8 - Image pasting</h3>
+                <li>Added support for image pasting.</li>
+                <li>Updated the nav bar.</li>
+                <li>Can join custom room without logging out.</li>
                 <h3>Update 4.5 - Sidebar nav</h3>
                 <li>Added a sidebar navigation for ease of use.</li>
                 <h3>Update 4.1 - Image supporting</h3>
@@ -146,16 +185,40 @@
       searchBtn = body.querySelector(".search-box"),
       modeSwitch = body.querySelector(".toggle-switch"),
       modeText = body.querySelector(".mode-text");
-      let usernameText = document.getElementById("usernameName")
       let onPhone = false
+      let canSend = true
+      let usernameText = document.getElementById("usernameName")
+      let RoomCode = document.getElementById("RoomCode")
+      const playSpace = document.getElementById("ForMobile")
+      const playSpacePC = document.getElementById("ForDesktop")
+      const colourSpace = document.getElementById("ForMobile2")
+      const joinSpace = document.getElementById("ForMobile3")
+      const joinSpacePC = document.getElementById("ForDeskop2")
       const iconThing = document.getElementById("iconThing")
-toggle.addEventListener("click" , () =>{
+      const textarea = document.getElementById("messageInput")
+      const roomInput = document.getElementById("RoomInput")
+      const joinRoom = document.getElementById("joinRoom")
+      toggle.addEventListener("click" , () =>{
     sidebar.classList.toggle("close");
-    if (usernameText.textContent.length > 8){
-        console.log("Wrap username...")
-    }
     if (iconThing.style.opacity == 0){
         onPhone = true
+        if (window.innerWidth < 500 && window.innerHeight < 1000) {
+            playButton.style.width="5%"
+            playButton.innerText = "►"
+            playSpace.style.display = "inline"
+            colourSpace.style.display = "inline"
+            joinSpace.style.display = "inline"
+            joinSpacePC.style.display = "none"
+            roomInput.style.width = "35%"
+            joinRoom.style.width="50%"
+            joinRoom.style.padding = "13px 11px"
+            playSpacePC.style.display = "none"
+            RoomCodeCode = RoomCode.innerText.slice(11)
+            RoomCode.innerText = `Room code:\n ${RoomCodeCode}`
+            if (usernameText.textContent.length > 8){
+                usernameText.innerText = usernameText.textContent.slice(0, 8) + '\n' + usernameText.textContent.slice(8);
+            } 
+        }
         iconThing.style.opacity = 1
     }
     else if (iconThing.style.opacity == 1 && onPhone){
@@ -163,6 +226,36 @@ toggle.addEventListener("click" , () =>{
     }
     
 })
+
+joinRoom.addEventListener("click", (event) => {
+    console.log(roomInput.value.length)
+    if (roomInput.value.length == 5) {
+        localStorage.setItem("roomNumber", roomInput.value);
+        socket.emit("joinRoom", {joinRoom: roomInput.value})
+        setTimeout(()=>{
+            window.location.href = "https://"+ document.domain +"/customRoom"
+        },500)}else {
+            send_system_message("Room number has to be 5 characters long!")
+        }
+})
+
+textarea.addEventListener('focus', () => {
+    textarea.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === 'v') {
+            if (canSend){
+                canSend = false
+                pasteImage()
+                setTimeout(funtion =>{
+                    canSend = true
+                },1200)
+            }
+        }
+    });
+});
+
+textarea.addEventListener('blur', () => {
+    textarea.removeEventListener('keydown', () => {});
+});
     </script>
     <!--<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="ItsbaileyX3525" data-color="#FF5F5F" data-emoji="☕"  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>-->
 </body>

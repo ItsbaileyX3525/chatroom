@@ -273,6 +273,13 @@ socket.on('getMessages', function(data){
     }
 })
 
+let playButton = document.getElementsByClassName("play-button")[0]
+let selectionAudio = document.getElementById("play_sounds")
+playButton.addEventListener("click", function(){
+    const messageToSend = `/play ${selectionAudio.value}`
+    socket.emit('message', {'username': setUsername, 'message': messageToSend, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
+})
+
 //Just shows notifactions for when someone connects or if the server would like to say anythin
 function showNotification(message) {
     const notification = document.getElementById('notification');
@@ -289,8 +296,11 @@ function Logout(){
     localStorage.clear()
     window.location.href = '../Login'
 }
+
+const roomText = document.getElementById("RoomCode")
 addEventListener("DOMContentLoaded", (event) => {
     socket.emit('OnConnect', setUsername, roomCode)
+    roomText.innerText = `Room code: ${roomCode}`
     send_system_message(`Welcome ${setUsername}, use /help for a list of commands. This rooms code is: ` + roomCode)
 });
 
@@ -353,3 +363,6 @@ if (!hasColour){
     localStorage.setItem("colour", "--blue")
 }}
 setTimeout(testColour, 200)
+
+const names = document.getElementById("usernameName")
+names.textContent = setUsername

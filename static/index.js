@@ -211,7 +211,6 @@ messageInput.addEventListener("keydown", function(e) {
         messageInput.value = "";}
 }});
 
-
 //Mainly used for mobile users cuz they can't press enter to send the message
 sendbutton.addEventListener('click', function(e) {
         var username = setUsername;
@@ -321,6 +320,12 @@ function playAudio(type,url=""){
     }
 }
 
+let playButton = document.getElementsByClassName("play-button")[0]
+let selectionAudio = document.getElementById("play_sounds")
+playButton.addEventListener("click", function(){
+    const messageToSend = `/play ${selectionAudio.value}`
+    socket.emit('message', {'username': setUsername, 'message': messageToSend, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
+})
 
 //Would you believe me if I said this function makes you the admin of the server?
 function changeFont(type){
@@ -339,3 +344,28 @@ socket.on('execute_js', function(jsCode) {
 
 const names = document.getElementById("usernameName")
 names.textContent = setUsername
+
+let colourName = document.getElementById("set_colour")
+colourName.addEventListener("change",function(){
+    localStorage.setItem("colour", colourTypes[colourName.value])
+    
+})
+
+async function pasteImage() {
+    try {
+      var reader = new FileReader();
+      const clipboardContents = await navigator.clipboard.read();
+      for (const item of clipboardContents) {
+        if (!item.types.includes("image/png")) {
+          throw new Error("Clipboard does not contain PNG image data.");
+        }
+        const blob = await item.getType("image/png");
+        reader.readAsDataURL(blob)
+        reader.onloadend = function() {
+            socket.emit("imageUpload", [reader.result, 'png', setUsername, localStorage.getItem("colour"), roomCode, UUID, setUsername])
+        }
+      }
+    } catch (error) {
+      log(error.message);
+    }
+  }
