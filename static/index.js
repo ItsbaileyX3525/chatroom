@@ -4,7 +4,7 @@ document.documentElement.style.setProperty('--font-family:', userFont);
 const root = document.querySelector(':root');
 const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
-const seenUpdate = localStorage.getItem("ClosedUpdates4") || false
+const seenUpdate = localStorage.getItem("ClosedUpdates6") || false
 
 if(seenUpdate === "true"){
     containerUpdate.style.display = "none"
@@ -12,7 +12,7 @@ if(seenUpdate === "true"){
 
 closeUpdateLog.addEventListener("click", function(e){
     containerUpdate.style.display = "none"
-    localStorage.setItem("ClosedUpdates3", true)
+    localStorage.setItem("ClosedUpdates6", true)
 })
 
 //Server stuff (on server)
@@ -305,20 +305,23 @@ function notifyUser(){
 }}
 
 //For handling the audio the server has sent for the users to hear
-function playAudio(type,url=""){
-    if (type != "custom"){
-        customAudios[type].play()}
-    else {
-        console.log(url)
-        let audioToPlay = new Audio(url)
-        if (!audioToPlay.duration > 5){
-            audioToPlay.play()
-            setTimeout(() => {
-                audioToPlay.remove();
-              }, audioToPlay.duration);
-        }
+function playAudio(type, url = "") {
+    if (type != "custom") {
+        customAudios[type].play();
+    } else {
+        let audioToPlay = new Audio(url);
+        audioToPlay.addEventListener('loadedmetadata', () => {
+            if (audioToPlay.duration < 5.0) {
+                audioToPlay.play();
+                console.log("Played")
+                setTimeout(() => {
+                    audioToPlay.remove();
+                }, audioToPlay.duration * 1000);
+            }
+        });
     }
 }
+
 
 let playButton = document.getElementsByClassName("play-button")[0]
 let selectionAudio = document.getElementById("play_sounds")
@@ -346,6 +349,11 @@ const names = document.getElementById("usernameName")
 names.textContent = setUsername
 
 let colourName = document.getElementById("set_colour")
+colourName.addEventListener("onKeyUp",function(){
+    localStorage.setItem("colour", colourTypes[colourName.value])
+    
+})
+
 colourName.addEventListener("change",function(){
     localStorage.setItem("colour", colourTypes[colourName.value])
     
@@ -366,6 +374,6 @@ async function pasteImage() {
         }
       }
     } catch (error) {
-      log(error.message);
+      console.log(error.message);
     }
   }

@@ -152,6 +152,7 @@
 
 joinRoom.addEventListener("click", (event) => {
     if (roomInput.value.length == 5){
+        localStorage.setItem("roomNumber", roomInput.value);
         socket.emit("joinRoom", {joinRoom: roomInput.value})
         setTimeout(()=>{
             window.location.href = "https://"+ document.domain +"/customRoom"

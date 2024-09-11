@@ -378,7 +378,7 @@ def handle_user_upload(imageData):
         else:
             add_message(username, message, date, colour, room)
             
-        send({'username': username, 'message': message, 'date': date}, to=room)
+        send({'username': username, 'message': message, 'date': date, "colour": colour}, to=room)
 
 @socketio.on('message')
 def handle_message(message_data):

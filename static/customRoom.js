@@ -352,6 +352,17 @@ function playAudio(type,url=""){
     }
 }
 
+let colourName = document.getElementById("set_colour")
+colourName.addEventListener("onKeyUp",function(){
+    localStorage.setItem("colour", colourTypes[colourName.value])
+    
+})
+
+colourName.addEventListener("change",function(){
+    localStorage.setItem("colour", colourTypes[colourName.value])
+    
+})
+
 //Would you believe me if I said this function makes you the admin of the server?
 function changeFont(type){
     root.style.setProperty('--font-family', type);

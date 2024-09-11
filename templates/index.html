@@ -95,6 +95,10 @@
             <h1>Update Log</h1>
             <span id="closeUpdateLog"><p>X</p></span>
             <div class="updates">
+                <h3>Update 4.9 - Return of the fixes</h3>
+                <li>Fixed an issue where custom sound wouldn't work in public room.</li>
+                <li>Fixed username colour changing when sending an image.</li>
+                <li>And fixed username colours on custom chatrooms... I think?</li>
                 <h3>Update 4.8 - Image pasting</h3>
                 <li>Added support for image pasting.</li>
                 <li>Updated the nav bar.</li>
@@ -106,12 +110,12 @@
                 <li>Fixed a few memory leaks improving memory usage.</li>
                 <li>Data streaming added so images load smoothly.</li>
                 <li>Added the cursor pointer to image uploading.</li>
-                <li>Fuxed the banning system so users don't get banned.</li>
+                <li>Fixed the banning system so wrong users don't get banned.</li>
                 <li>Added help for colour types and displaying all colours.</li>
                 <h3>Update 4 - The APK and EXE update.</h3>
                 <li>Created a build for windows and linux. (exe and sh)</li>
                 <li>Created an apk for mobile <a target="_blank" href="https://github.com/ItsbaileyX3525/chatroom/raw/master/build/Chatroom.apk" style="color: salmon;">HERE.</a></li>
-                <li>Added a custom sound max length.</li>
+                <li>Added a custom sound max length to public room.</li>
                 <h3>Update 3.5</h3>
                 <li>Increased chat limit to 250 chars.</li>
                 <li>Custom chatrooms now save.</li>
@@ -119,8 +123,8 @@
                 <li>Notify user that the username colour has reset.</li>
                 <h3>Update 3.2</h3>
                 <li>Fixed image uploading.</li>
-                <li>Added a limit to the username lengh.</li>
-                <li>Added a limit to the lenth of your message. (may change)</li>
+                <li>Added a limit to the username length.</li>
+                <li>Added a limit to the length of your message. (may change)</li>
                 <h3>Update 3.1</h3>
                 <li>Fixed chatrooms going out of sync with server (maybe)</li>
                 <li>Removed the ability to have spaces in username</li>
@@ -228,7 +232,6 @@
 })
 
 joinRoom.addEventListener("click", (event) => {
-    console.log(roomInput.value.length)
     if (roomInput.value.length == 5) {
         localStorage.setItem("roomNumber", roomInput.value);
         socket.emit("joinRoom", {joinRoom: roomInput.value})
