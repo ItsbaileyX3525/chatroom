@@ -297,10 +297,40 @@ function Logout(){
     window.location.href = '../Login'
 }
 
+function changeTheme(type){
+    const chatBox = document.getElementById('chat-box');
+
+    if (type == "dark"){
+        document.body.setAttribute('data-theme', 'dark');
+        chatBox.style.backgroundImage = null
+        document.getElementById("client_theme").getElementsByTagName('option')[0].selected = true;
+    
+    }
+    if (type == "light"){
+        document.body.setAttribute('data-theme', 'light');
+        chatBox.style.backgroundImage = null
+        document.getElementById("client_theme").getElementsByTagName('option')[1].selected = true;
+    }
+    if (type=="anime"){
+        document.getElementById("client_theme").getElementsByTagName('option')[2].selected = true;
+
+        chatBox.style.backgroundImage = 'url("https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5dd3ffa7-d6d9-47f5-894d-a7b19db5eb1b/dep3788-96913ebb-dffd-4aff-af56-a44b47456a37.jpg/v1/fit/w_828,h_466,q_70,strp/jojo_wallpaper_by_lagrie_dep3788-414w-2x.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NzIwIiwicGF0aCI6IlwvZlwvNWRkM2ZmYTctZDZkOS00N2Y1LTg5NGQtYTdiMTlkYjVlYjFiXC9kZXAzNzg4LTk2OTEzZWJiLWRmZmQtNGFmZi1hZjU2LWE0NGI0NzQ1NmEzNy5qcGciLCJ3aWR0aCI6Ijw9MTI4MCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.8ph_LxUOp5wVU30AE5qBk9WJvYiCALg3U8Eu0H0n7Ko")';
+        chatBox.style.backgroundSize = 'cover';
+    }
+    if (type=="cod"){
+        document.getElementById("client_theme").getElementsByTagName('option')[3].selected = true;
+
+        chatBox.style.backgroundImage = 'url("https://www.psu.com/wp/wp-content/uploads/2020/09/call-of-duty-black-ops-3-ps4-wallpapers-10.jpg")';
+        chatBox.style.backgroundSize = 'cover';
+    }
+}
+
 const roomText = document.getElementById("RoomCode")
 addEventListener("DOMContentLoaded", (event) => {
     socket.emit('OnConnect', setUsername, roomCode)
     roomText.innerText = `Room code: ${roomCode}`
+    changeTheme(localStorage.getItem("clientTheme"))
+    //document.getElementById("ChatroomThemeText").innerHTML = "Chatroom \nTheme:"
     send_system_message(`Welcome ${setUsername}, use /help for a list of commands. This rooms code is: ` + roomCode)
 });
 
@@ -367,6 +397,13 @@ colourName.addEventListener("change",function(){
 function changeFont(type){
     root.style.setProperty('--font-family', type);
 }
+
+let clientTheme = document.getElementById("client_theme")
+clientTheme.addEventListener("change",function(){
+    localStorage.setItem("clientTheme", clientTheme.value)
+    changeTheme(clientTheme.value)
+    
+})
 
 function testColour(){
 if (!hasColour){
