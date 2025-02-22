@@ -4,7 +4,9 @@ document.documentElement.style.setProperty('--font-family:', userFont);
 const root = document.querySelector(':root');
 const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
-const seenUpdate = localStorage.getItem("ClosedUpdates6") || false
+const seenUpdate = localStorage.getItem("ClosedUpdates7") || false
+
+let isDisconnected = false
 
 if(seenUpdate === "true"){
     containerUpdate.style.display = "none"
@@ -12,11 +14,11 @@ if(seenUpdate === "true"){
 
 closeUpdateLog.addEventListener("click", function(e){
     containerUpdate.style.display = "none"
-    localStorage.setItem("ClosedUpdates6", true)
+    localStorage.setItem("ClosedUpdates7", true)
 })
 
 //Server stuff (on server)
-const socket = io.connect('https://' + document.domain + ":443");
+const socket = io.connect('https://' + window.location.hostname + ":443");
 const chatBox = document.getElementById("chat-box");
 const messageInput = document.getElementById("messageInput")
 const sendbutton = document.getElementById("sendButton")
@@ -158,6 +160,11 @@ function change_colour(){
     }
 }
 
+function reconnect(){
+    socket.connect()
+    return true
+}
+
 function colour_list(){
     send_system_message("Current list of name colours are: 'green', 'blue', 'dBlue', 'yellow', 'purple', 'orange', 'permanentGeraniumLake'")
     return true
@@ -174,11 +181,13 @@ cmds = {
     "/color": change_colour, //Cause americans are stinky and don't know how to spell colour
     "/colourList": colour_list,
     "/colorList": colour_list,
-    "/playList": sound_list
+    "/playList": sound_list,
+    "/connect" : reconnect,
 }
 
 //To stop the user creating a new line on keyboard
 messageInput.addEventListener("keydown", function(e) {
+    if(!isDisconnected){
     if (e.key === "Enter") {
         e.preventDefault();
 
@@ -208,11 +217,12 @@ messageInput.addEventListener("keydown", function(e) {
         }
         else if (message){
         socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
-        messageInput.value = "";}
+        messageInput.value = "";}}
 }});
 
 //Mainly used for mobile users cuz they can't press enter to send the message
 sendbutton.addEventListener('click', function(e) {
+    if(!isDisconnected){
         var username = setUsername;
         const message = messageInput.value;
         username = username.trim();
@@ -239,7 +249,7 @@ sendbutton.addEventListener('click', function(e) {
         }
         else if (message){
         socket.emit('message', {'username': username, 'message': message, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
-        messageInput.value = "";}
+        messageInput.value = "";}}
 });
 
 //Just shows notifactions for when someone connects or if the server would like to say anythin
@@ -355,9 +365,12 @@ function playAudio(type, url = "") {
 
 let playButton = document.getElementsByClassName("play-button")[0]
 let selectionAudio = document.getElementById("play_sounds")
+
 playButton.addEventListener("click", function(){
+    if(!isDisconnected){
     const messageToSend = `/play ${selectionAudio.value}`
     socket.emit('message', {'username': setUsername, 'message': messageToSend, 'UUID': UUID, 'colour': localStorage.getItem("colour"), "roomNumber": roomCode});
+    }
 })
 
 //Would you believe me if I said this function makes you the admin of the server?
@@ -393,6 +406,21 @@ let clientTheme = document.getElementById("client_theme")
 clientTheme.addEventListener("change",function(){
     localStorage.setItem("clientTheme", clientTheme.value)
     changeTheme(clientTheme.value)
+})
+
+socket.on("disconnect", (e) => {
+    send_system_message("You have been disconnected from the server, please refresh the page to reconnect, or type /connect when you have a stable internet connection.", e)
+    isDisconnected = true
+  });
+
+socket.on("connect_error", (e) => {
+    send_system_message("Failed to connect to server, please refresh the page to reconnect, or type /connect when you have a stable internet connection.", e)
+    isDisconnected = true
+  });
+
+socket.on("connect", (e) => {
+    send_system_message("Successfully connected to the server, you can now send messages!")
+    isDisconnected = false
 })
 
 async function pasteImage() {

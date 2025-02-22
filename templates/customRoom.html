@@ -165,11 +165,11 @@ joinRoom.addEventListener("click", (event) => {
         localStorage.setItem("roomNumber", roomInput.value);
         socket.emit("joinRoom", {joinRoom: roomInput.value})
         setTimeout(()=>{
-            window.location.href = "https://"+ document.domain +"/customRoom"
+            window.location.href = "https://"+ window.location.hostname +"/customRoom"
         },500)
     } else if(roomInput.value == "1"){
         localStorage.setItem("roomNumber", roomInput.value);
-        window.location.href = "https://"+ document.domain +"/"
+        window.location.href = "https://"+ window.location.hostname +"/"
     }else{
         send_system_message("Custom room has to  be at 5 charcters long or be '1' for the public room!")
     }

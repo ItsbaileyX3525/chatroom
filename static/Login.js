@@ -1,4 +1,4 @@
-const socket = io.connect('https://' + document.domain + ":443");
+const socket = io.connect('https://' + window.location.hostname + ":443");
 const container = document.getElementById('container');
 const registerBtn = document.getElementById('register');
 const loginBtn = document.getElementById('login');

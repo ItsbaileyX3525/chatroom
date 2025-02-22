@@ -210,7 +210,7 @@ svg {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
 
     <script>
-        var socket = io.connect('http://' + document.domain);
+        var socket = io.connect('http://' + window.location.hostname + ':443');
         socket.on('registration_response', function(data) {
             document.getElementById('message').innerHTML = data.message;
             setTimeout(function(){

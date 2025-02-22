@@ -1,0 +1,10 @@
+databases/*
+!databases/.blank
+!databases/chatroomVersion.txt
+.env
+local-cert.pem
+key.pem
+builds/*
+static/uploadedImages/*
+!static/uploadedImages/.blank
+api/__pycache__/*

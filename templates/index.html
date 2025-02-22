@@ -105,6 +105,10 @@
             <h1>Update Log</h1>
             <span id="closeUpdateLog"><p>X</p></span>
             <div class="updates">
+                <h3>Update 5.1</h3>
+                <li>Impoved code maintainability by a lot...</li>
+                <li>Fixed some broken code</li>
+                <li>Added indication if you lost connection</li>
                 <h3>Update 5.0 - Theme update</h3>
                 <li>Added chatroom themes</li>
                 <h3>Update 4.9 - Return of the fixes</h3>
@@ -248,7 +252,7 @@ joinRoom.addEventListener("click", (event) => {
         localStorage.setItem("roomNumber", roomInput.value);
         socket.emit("joinRoom", {joinRoom: roomInput.value})
         setTimeout(()=>{
-            window.location.href = "https://"+ document.domain +"/customRoom"
+            window.location.href = "https://"+ window.location.hostname +"/customRoom"
         },500)}else {
             send_system_message("Room number has to be 5 characters long!")
         }

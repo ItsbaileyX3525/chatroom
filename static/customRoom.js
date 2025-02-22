@@ -10,7 +10,7 @@ const hasColour = localStorage.getItem('colour') || false
 
 
 //Server stuff (on server)
-const socket = io.connect('https://' + document.domain + ":443");
+const socket = io.connect('https://' + window.location.hostname + ":443");
 const chatBox = document.getElementById("chat-box");
 const messageInput = document.getElementById("messageInput")
 const sendbutton = document.getElementById("sendButton")
@@ -411,6 +411,21 @@ if (!hasColour){
     localStorage.setItem("colour", "--blue")
 }}
 setTimeout(testColour, 200)
+
+socket.on("disconnect", (e) => {
+    send_system_message("You have been disconnected from the server, please refresh the page to reconnect, or type /connect when you have a stable internet connection.", e)
+    isDisconnected = true
+  });
+
+socket.on("connect_error", (e) => {
+    send_system_message("Failed to connect to server, please refresh the page to reconnect, or type /connect when you have a stable internet connection.", e)
+    isDisconnected = true
+  });
+
+socket.on("connect", (e) => {
+    send_system_message("Successfully connected to the server, you can now send messages!")
+    isDisconnected = false
+})
 
 const names = document.getElementById("usernameName")
 names.textContent = setUsername
