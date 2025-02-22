@@ -221,6 +221,7 @@ def handle_user_upload(data):
             send_system_message("Invalid image upload data.", sid=request.sid)
             return
 
+    checked_return = True
     can_send = False
     user_uuid = data.get("UUID")
     username = data.get("username")
@@ -277,10 +278,11 @@ def handle_user_upload(data):
             
             message_html = f'<img src="../{file_path}" alt="{html.escape(username)}"/>'
             if room == "1":
-                add_message(username, message_html, date, colour)
+                checked_return = add_message(username, message_html, date, colour)
             else:
-                add_message(username, message_html, date, colour, room)
-            send({'username': username, 'message': message_html, 'date': date, "colour": colour}, to=room)
+                checked_return = add_message(username, message_html, date, colour, room)
+            if checked_return:
+                send({'username': username, 'message': message_html, 'date': date, "colour": colour}, to=room)
 
 @socketio.on('message')
 def handle_message(message_data):
@@ -298,7 +300,7 @@ def handle_message(message_data):
     date = epoch_to_dd_mm_yyyy()
     colour = message_data['colour']
     trimmedMessage = message.split()
-
+    checked_return = True
     
 
     #Validating UUID because someone could fake their username
@@ -331,12 +333,13 @@ def handle_message(message_data):
             else:
                 escaped_message = html.escape(message)
                 if roomNumber == "1":
-                    add_message(username, escaped_message, date, colour)
+                    checked_return = add_message(username, escaped_message, date, colour)
                 else:
-                    print("The colours:",colour)
-                    add_message(username, escaped_message, date, colour, roomNumber)
+                    checked_return = add_message(username, escaped_message, date, colour, roomNumber)
                 escaped_message = replace_colon_items(escaped_message)
-                send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=roomNumber)
+                print(checked_return)
+                if checked_return:
+                    send({'username': username, 'message': escaped_message, 'date': date, "colour": colour}, to=roomNumber)
         else:
             send_system_message("Error: UUID mismatch, likely because you tried to use a custom name, please contact the admin if not", sid=request.sid)
     else:

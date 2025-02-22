@@ -424,6 +424,7 @@ socket.on("connect_error", (e) => {
 
 socket.on("connect", (e) => {
     send_system_message("Successfully connected to the server, you can now send messages!")
+    socket.emit('join', {"room": roomCode});
     isDisconnected = false
 })
 

@@ -1,6 +1,4 @@
-//Webpage stuff (not on server)
-userFont = localStorage.getItem('font') || 'Normal'
-document.documentElement.style.setProperty('--font-family:', userFont);
+
 const root = document.querySelector(':root');
 const closeUpdateLog = document.getElementById("closeUpdateLog");
 const containerUpdate = document.getElementById("containerUpdate");
@@ -31,9 +29,16 @@ if (roomCode != 1){
 }
 socket.emit('join', {"room": roomCode});
 
+//Webpage stuff (not on server)
+userFont = localStorage.getItem('font') || 'Normal'
+document.documentElement.style.setProperty('--font-family:', userFont);
+
+if (!setUsername || !loggedin){
+  window.location.href = '../Login';
+}
+
 socket.on('message', function(data) {
-    notifyUser()
-    var rootStyle = getComputedStyle(root);
+    notifyUser();
     const messageElement = document.createElement("p");
     const UsernameDisplay = document.createElement("span");
     const UsernameMessage = document.createElement("span");
@@ -41,23 +46,29 @@ socket.on('message', function(data) {
     const chatBox = document.getElementById("chat-box");
     messageElement.classList.add("chat-message");
     UsernameDisplay.classList.add("username");
-    UsernameDisplay.style.color = rootStyle.getPropertyValue(data['colour']);
+    UsernameDisplay.style.color = getComputedStyle(root).getPropertyValue(data['colour']);
     UsernameDisplay.innerHTML = `${data['username']}: `;
     UsernameMessage.classList.add("message");
-    UsernameMessage.innerHTML = data['message']
+    UsernameMessage.innerHTML = data['message'];
     date.classList.add("date");
     date.innerHTML = data['date'];
     messageElement.appendChild(UsernameDisplay);
     messageElement.appendChild(UsernameMessage);
     messageElement.appendChild(date);
     chatBox.appendChild(messageElement);
-
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-if (!setUsername || !loggedin){
-  window.location.href = '../Login';
-}
+socket.on("connect", () => {
+    send_system_message("Successfully connected to the server, you can now send messages!");
+    isDisconnected = false;
+
+    socket.emit('join', {"room": roomCode}); 
+
+    // Ensure message event is reattached
+
+});
+
 
 function send_system_message(msg){
     const messageElement = document.createElement("p");
@@ -417,11 +428,6 @@ socket.on("connect_error", (e) => {
     send_system_message("Failed to connect to server, please refresh the page to reconnect, or type /connect when you have a stable internet connection.", e)
     isDisconnected = true
   });
-
-socket.on("connect", (e) => {
-    send_system_message("Successfully connected to the server, you can now send messages!")
-    isDisconnected = false
-})
 
 async function pasteImage() {
     try {

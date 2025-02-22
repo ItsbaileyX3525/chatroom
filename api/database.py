@@ -40,18 +40,30 @@ def get_messages(name):
 
 # Function to add a new message to the database
 def add_message(username, message, date, colour, room=False):
-    message = str.encode(message);username = str.encode(username);
+    print("Ran code")
+    message = str.encode(message)
+    username = str.encode(username)
     message = cipher_suite.encrypt(message)
     username = cipher_suite.encrypt(username)
-    if room:
-        conn = sqlite3.connect(f"./databases/custom/{room}.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO messages (username, message, date, colour) VALUES (?, ?, ?, ?)", (username, message, date, colour))
-        conn.commit()
-        conn.close()
-    else:
-        conn = sqlite3.connect("./databases/chatroom.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO messages (username, message, date, colour) VALUES (?, ?, ?, ?)", (username, message, date, colour))
-        conn.commit()
-        conn.close()
+
+    db_path = f"./databases/custom/{room}.db" if room else "./databases/chatroom.db"
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Fetch the last message from the same user
+    cursor.execute("SELECT message FROM messages WHERE username = ? ORDER BY id DESC LIMIT 1", (username,))
+    last_message = cursor.fetchone()
+
+    # Decrypt last message if exists
+    if last_message:
+        last_message_decrypted = cipher_suite.decrypt(last_message[0]).decode()
+        if last_message_decrypted == cipher_suite.decrypt(message).decode():
+            conn.close()
+            return False # Reject duplicate message
+
+    # Insert the new message
+    cursor.execute("INSERT INTO messages (username, message, date, colour) VALUES (?, ?, ?, ?)", (username, message, date, colour))
+    conn.commit()
+    conn.close()
+
+    return True
